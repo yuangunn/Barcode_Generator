@@ -10,6 +10,7 @@
   <meta name="apple-mobile-web-app-title" content="직번 바코드 생성기" />
   <link rel="manifest" href="manifest.json" />
   <style>
+    /* [기존 CSS 유지] */
     body {
       font-family: sans-serif;
       text-align: center;
@@ -60,9 +61,20 @@
       margin: 0 auto;
       width: 80%;
     }
+    /* 카카오톡 경고 메시지 스타일 */
+    .kakao-warning {
+      background: #ff3b30;
+      color: white;
+      padding: 16px;
+      margin: -40px -20px 20px;
+      border-radius: 0;
+    }
   </style>
 </head>
 <body>
+  <!-- 카카오톡 브라우저 경고 메시지 -->
+  <div id="kakaoWarning" style="display: none;"></div>
+
   <h1>💉 직번 바코드 생성기 🩺</h1>
   <p>텍스트를 입력하고 바코드를 생성하세요.</p>
 
@@ -85,30 +97,45 @@
   </footer>
 
   <script>
-    // 웹앱(PWA) 실행 여부 확인 함수
+    // 웹앱(PWA) 실행 여부 확인
     function isStandalone() {
-      // iOS: window.navigator.standalone, Android: window.matchMedia
       return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
         || window.navigator.standalone === true;
     }
 
-    // iOS Safari 브라우저에서만 true, PWA(웹앱)에서는 false
+    // iOS Safari 브라우저 감지
     function isIosSafariOnly() {
       const ua = window.navigator.userAgent;
       const isIOS = /iP(ad|hone|od)/.test(ua) && !window.MSStream;
-      const isSafari = /Safari/.test(ua) && !/CriOS/.test(ua) && !/FxiOS/.test(ua);
-      const isStandaloneMode = window.navigator.standalone === true;
-      return isIOS && isSafari && !isStandaloneMode;
+      const isSafari = /Safari/.test(ua) && !/CriOS|FxiOS/.test(ua);
+      return isIOS && isSafari && !isStandalone();
     }
 
+    // 카카오톡 브라우저 감지
+    function isKakaoTalkBrowser() {
+      return /KAKAOTALK/i.test(navigator.userAgent);
+    }
+
+    // 초기 로드 시 실행
     window.addEventListener('DOMContentLoaded', () => {
-      // 웹앱(PWA) 실행 시 안내문구 숨기기
-      if (isStandalone()) {
-        const guide = document.getElementById('barcodeGuide');
-        if (guide) guide.style.display = 'none';
+      // 카카오톡 브라우저 안내
+      if (isKakaoTalkBrowser()) {
+        const warningDiv = document.getElementById('kakaoWarning');
+        warningDiv.style.display = 'block';
+        warningDiv.innerHTML = `
+          <div class="kakao-warning">
+            ⚠️ 카카오톡 브라우저에서는 일부 기능이 제한됩니다.<br>
+            <b>기본 브라우저(사파리/크롬)</b>에서 열어주세요!
+          </div>
+        `;
       }
 
-      // iOS Safari 브라우저에서만 홈화면 추가 안내 표시
+      // 웹앱 모드일 때 안내문구 숨기기
+      if (isStandalone()) {
+        document.getElementById('barcodeGuide').style.display = 'none';
+      }
+
+      // iOS Safari 안내
       const installSection = document.getElementById('installSection');
       if (isIosSafariOnly()) {
         installSection.style.display = 'block';
@@ -133,9 +160,7 @@
       const img = document.getElementById("barcodeImage");
       img.src = url;
       img.style.display = "block";
-
-      const guide = document.getElementById("barcodeGuide");
-      guide.style.display = "none";
+      document.getElementById("barcodeGuide").style.display = "none";
     }
 
     // Android용 PWA 설치 로직
@@ -153,9 +178,7 @@
       if (e.target.id === 'installBtn') {
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            console.log('설치 완료');
-          }
+          if (choiceResult.outcome === 'accepted') console.log('설치 완료');
           deferredPrompt = null;
         });
       }
