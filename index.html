@@ -708,11 +708,11 @@
       <h2>설정</h2>
       <div class="settings-group">
         <label for="barcodeSize">바코드 크기</label>
-        <select id="barcodeSize">
-          <option value="2">작게</option>
-          <option value="3" selected>보통</option>
-          <option value="4">크게</option>
-        </select>
+                  <select id="barcodeSize">
+           <option value="2" selected>작게</option>
+           <option value="3">보통</option>
+           <option value="4">크게</option>
+          </select>
       </div>
       <div class="modal-buttons">
         <button id="closeSettingsBtn">닫기</button>
@@ -903,7 +903,7 @@
         return;
       }
 
-      const barcodeSize = localStorage.getItem('barcode-size') || '3';
+             const barcodeSize = localStorage.getItem('barcode-size') || '2';
       const encoded = encodeURIComponent(input);
       const url = `https://bwipjs-api.metafloor.com/?bcid=code128&text=${encoded}&scale=${barcodeSize}&backgroundcolor=ffffff&paddingwidth=20&paddingheight=40`;
 
@@ -943,7 +943,7 @@
       const barcodeSizeSelect = document.getElementById('barcodeSize');
 
       // 저장된 바코드 크기 설정 불러오기
-      const savedSize = localStorage.getItem('barcode-size') || '3';
+             const savedSize = localStorage.getItem('barcode-size') || '2';
       barcodeSizeSelect.value = savedSize;
 
       settingsBtn.onclick = function() {
