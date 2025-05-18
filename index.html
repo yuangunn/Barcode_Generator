@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>직번 바코드 생성기</title>
+  <title>바코드 생성기</title>
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="theme-color" content="#f9f9f9" media="(prefers-color-scheme: light)" />
   <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)" />
-  <meta name="apple-mobile-web-app-title" content="직번 바코드 생성기" />
+  <meta name="apple-mobile-web-app-title" content="바코드 생성기" />
   <link rel="manifest" href="manifest.json" />
   <style>
     body {
@@ -719,7 +719,7 @@
     </div>
   </div>
 
-  <h1>💉 직번 바코드 생성기 🩺</h1>
+  <h1>💉 바코드 생성기 🩺</h1>
   <p>텍스트를 입력하고 바코드를 생성하세요.</p>
 
   <form onsubmit="generateBarcode(); return false;" id="barcodeForm" style="display:flex; justify-content:center; align-items:center; gap:8px; margin-bottom:0;">
@@ -903,7 +903,7 @@
 
       const barcodeSize = localStorage.getItem('barcode-size') || '3';
       const encoded = encodeURIComponent(input);
-      const url = `https://bwipjs-api.metafloor.com/?bcid=code128&text=${encoded}&includetext&textfont=Serif&textsize=10&textxalign=center&scale=${barcodeSize}&backgroundcolor=ffffff&paddingwidth=20&paddingheight=40`;
+      const url = `https://bwipjs-api.metafloor.com/?bcid=code128&text=${encoded}&scale=3${barcodeSize}&backgroundcolor=ffffff&paddingwidth=20&paddingheight=40`;
 
       const img = document.getElementById("barcodeImage");
       img.src = url;
@@ -1151,7 +1151,7 @@
           await navigator.share({
             files: [file],
             title: '바코드 공유',
-            text: `직번 바코드: ${barcode}`
+            text: `바코드: ${barcode}`
           });
         } else {
           // 공유 API를 지원하지 않는 경우 다운로드로 대체
