@@ -19,6 +19,25 @@
       margin: 0;
       transition: background 0.2s, color 0.2s;
     }
+
+    /* 웹앱 상태일 때의 배경색 */
+    @media all and (display-mode: standalone) {
+      body {
+        background-color: #f9f9f9;
+      }
+      body.dark, body[data-theme="dark"] {
+        background-color: #1a1a1a;
+      }
+    }
+
+    /* iOS standalone 모드일 때의 배경색 */
+    body.standalone {
+      background-color: #f9f9f9;
+    }
+    body.standalone.dark, body.standalone[data-theme="dark"] {
+      background-color: #1a1a1a;
+    }
+
     input[type="text"] {
       width: 80%;
       padding: 12px;
@@ -227,6 +246,96 @@
       background: inherit;
       color: inherit;
     }
+    /* 설정 버튼 스타일 */
+    #settingsBtn {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      z-index: 2000;
+      background: rgba(255,255,255,0.85);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 8px 12px;
+      font-size: 14px;
+      color: #444;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    /* 설정 모달 스타일 */
+    #settingsModal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 3000;
+    }
+    .modal-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      width: 80%;
+      max-width: 400px;
+    }
+    body.dark .modal-content, body[data-theme="dark"] .modal-content {
+      background: #2d2d2d;
+      color: #e0e0e0;
+    }
+    .modal-content h2 {
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+    .settings-group {
+      margin-bottom: 20px;
+    }
+    .settings-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    .settings-group select, .settings-group input {
+      width: 100%;
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+      background: white;
+    }
+    body.dark .settings-group select, 
+    body.dark .settings-group input,
+    body[data-theme="dark"] .settings-group select,
+    body[data-theme="dark"] .settings-group input {
+      background: #1a1a1a;
+      border-color: #404040;
+      color: #e0e0e0;
+    }
+    .modal-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 20px;
+    }
+    .modal-buttons button {
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #closeSettingsBtn {
+      background: #f1f1f1;
+      color: #333;
+      border: 1px solid #ddd;
+    }
+    body.dark #closeSettingsBtn, body[data-theme="dark"] #closeSettingsBtn {
+      background: #404040;
+      color: #e0e0e0;
+      border-color: #555;
+    }
   </style>
 </head>
 <body>
@@ -242,6 +351,29 @@
       <option value="light">라이트모드</option>
       <option value="dark">다크모드</option>
     </select>
+  </div>
+
+  <!-- 설정 버튼 -->
+  <button id="settingsBtn">⚙️ 설정</button>
+
+  <!-- 설정 모달 -->
+  <div id="settingsModal">
+    <div class="modal-content">
+      <h2>설정</h2>
+      <div class="settings-group">
+        <label for="barcodeSize">바코드 크기</label>
+        <select id="barcodeSize">
+          <option value="2">작게</option>
+          <option value="3" selected>보통</option>
+          <option value="4">크게</option>
+          <option value="5">매우 크게</option>
+        </select>
+      </div>
+      <div class="modal-buttons">
+        <button id="closeSettingsBtn">닫기</button>
+        <button onclick="saveSettings()">저장</button>
+      </div>
+    </div>
   </div>
 
   <h1>💉 직번 바코드 생성기 🩺</h1>
@@ -363,6 +495,13 @@
       return isIOS && isSafari && !isStandalone();
     }
 
+    // iOS standalone 모드 감지 및 클래스 추가
+    function addStandaloneClass() {
+      if (window.navigator.standalone === true) {
+        document.body.classList.add('standalone');
+      }
+    }
+
     // 최근 바코드 저장/불러오기
     function saveRecentBarcode(input) {
       let recents = JSON.parse(localStorage.getItem('recent-barcodes') || '[]');
@@ -397,8 +536,9 @@
         return;
       }
 
+      const barcodeSize = localStorage.getItem('barcode-size') || '3';
       const encoded = encodeURIComponent(input);
-      const url = `https://bwipjs-api.metafloor.com/?bcid=code128&text=${encoded}&includetext&textfont=Serif&textsize=10&textxalign=center&scale=3&backgroundcolor=ffffff&paddingwidth=20&paddingheight=40`;
+      const url = `https://bwipjs-api.metafloor.com/?bcid=code128&text=${encoded}&includetext&textfont=Serif&textsize=10&textxalign=center&scale=${barcodeSize}&backgroundcolor=ffffff&paddingwidth=20&paddingheight=40`;
 
       const img = document.getElementById("barcodeImage");
       img.src = url;
@@ -421,9 +561,52 @@
       saveRecentBarcode(input);
     }
 
+    // 설정 관련 함수들
+    function initSettings() {
+      const settingsBtn = document.getElementById('settingsBtn');
+      const settingsModal = document.getElementById('settingsModal');
+      const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+      const barcodeSizeSelect = document.getElementById('barcodeSize');
+
+      // 저장된 바코드 크기 설정 불러오기
+      const savedSize = localStorage.getItem('barcode-size') || '3';
+      barcodeSizeSelect.value = savedSize;
+
+      settingsBtn.onclick = function() {
+        settingsModal.style.display = 'block';
+      };
+
+      closeSettingsBtn.onclick = function() {
+        settingsModal.style.display = 'none';
+      };
+
+      // 모달 외부 클릭시 닫기
+      settingsModal.onclick = function(e) {
+        if (e.target === settingsModal) {
+          settingsModal.style.display = 'none';
+        }
+      };
+    }
+
+    function saveSettings() {
+      const barcodeSizeSelect = document.getElementById('barcodeSize');
+      localStorage.setItem('barcode-size', barcodeSizeSelect.value);
+      
+      // 현재 표시된 바코드가 있다면 새로운 크기로 다시 생성
+      const currentInput = document.getElementById('barcodeInput').value.trim();
+      if (currentInput && document.getElementById('barcodeImage').style.display !== 'none') {
+        generateBarcode();
+      }
+
+      // 모달 닫기
+      document.getElementById('settingsModal').style.display = 'none';
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
       showBrowserWarning();
       createBrowserSwitch();
+      initSettings();
+      addStandaloneClass();  // standalone 클래스 추가
 
       if (isStandalone()) {
         document.getElementById('barcodeGuide').style.display = 'none';
