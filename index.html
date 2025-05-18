@@ -10,7 +10,6 @@
   <meta name="apple-mobile-web-app-title" content="직번 바코드 생성기" />
   <link rel="manifest" href="manifest.json" />
   <style>
-    /* [기존 CSS 유지] */
     body {
       font-family: sans-serif;
       text-align: center;
@@ -61,7 +60,6 @@
       margin: 0 auto;
       width: 80%;
     }
-    /* 카카오톡 경고 메시지 스타일 */
     .kakao-warning {
       background: #ff3b30;
       color: white;
@@ -69,9 +67,27 @@
       margin: -40px -20px 20px;
       border-radius: 0;
     }
+    #browserSwitch {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+    }
+    .browser-btn {
+      background: #4CAF50 !important;
+      margin: 5px;
+      padding: 8px 16px !important;
+      font-size: 14px !important;
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
+  <!-- 브라우저 전환 버튼 -->
+  <div id="browserSwitch"></div>
   <!-- 카카오톡 브라우저 경고 메시지 -->
   <div id="kakaoWarning" style="display: none;"></div>
 
@@ -97,6 +113,70 @@
   </footer>
 
   <script>
+    // 브라우저/OS 감지 함수들
+    function isAndroid() {
+      return /Android/i.test(navigator.userAgent);
+    }
+    function isiOS() {
+      return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    }
+    function isChrome() {
+      return /Chrome/i.test(navigator.userAgent) && !/SamsungBrowser/i.test(navigator.userAgent);
+    }
+    function isSafari() {
+      return /Safari/i.test(navigator.userAgent) && !/CriOS|FxiOS/i.test(navigator.userAgent);
+    }
+
+    // 브라우저 전환 버튼 생성
+    function createBrowserSwitch() {
+      const container = document.getElementById('browserSwitch');
+      let html = '';
+
+      // Android + Chrome 아닌 경우
+      if (isAndroid() && !isChrome()) {
+        html += `<button class="browser-btn" onclick="openInChrome()">크롬에서 열기</button>`;
+      }
+
+      // iOS + Safari 아닌 경우
+      if (isiOS() && !isSafari()) {
+        html += `<button class="browser-btn" onclick="openInSafari()">사파리에서 열기(주소 복사)</button>`;
+      }
+
+      if (html) container.innerHTML = html;
+    }
+
+    // 크롬에서 열기 (Android)
+    function openInChrome() {
+      const url = encodeURIComponent(location.href.replace(/^https?:\/\//, ''));
+      window.location.href = `intent://${url}#Intent;scheme=https;package=com.android.chrome;end`;
+    }
+
+    // 사파리에서 열기 (iOS, 주소 자동 복사)
+    function openInSafari() {
+      const url = location.href;
+      // 클립보드 복사
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(url).then(function() {
+          alert('주소가 복사되었습니다!\n사파리에서 붙여넣기 해주세요.');
+        }, function() {
+          alert('주소 복사에 실패했습니다.\n아래 주소를 직접 복사해 주세요:\n' + url);
+        });
+      } else {
+        // 구형 브라우저 대응
+        const temp = document.createElement('input');
+        temp.value = url;
+        document.body.appendChild(temp);
+        temp.select();
+        try {
+          document.execCommand('copy');
+          alert('주소가 복사되었습니다!\n사파리에서 붙여넣기 해주세요.');
+        } catch (err) {
+          alert('주소 복사에 실패했습니다.\n아래 주소를 직접 복사해 주세요:\n' + url);
+        }
+        document.body.removeChild(temp);
+      }
+    }
+
     // 웹앱(PWA) 실행 여부 확인
     function isStandalone() {
       return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
@@ -118,6 +198,8 @@
 
     // 초기 로드 시 실행
     window.addEventListener('DOMContentLoaded', () => {
+      createBrowserSwitch();
+
       // 카카오톡 브라우저 안내
       if (isKakaoTalkBrowser()) {
         const warningDiv = document.getElementById('kakaoWarning');
