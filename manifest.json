@@ -1,7 +1,7 @@
 {
   "name": "직번 바코드 생성기",
-  "short_name": "바코드 생성기",
-  "start_url": ".",
+  "short_name": "사원증 바코드",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#007aff",
