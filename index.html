@@ -247,10 +247,9 @@
   <h1>💉 직번 바코드 생성기 🩺</h1>
   <p>텍스트를 입력하고 바코드를 생성하세요.</p>
 
-  <form onsubmit="generateBarcode(); return false;">
-    <input type="text" id="barcodeInput" placeholder="예: 0123456" required maxlength="7" inputmode="numeric" />
-    <br />
-    <button type="submit">바코드 생성</button>
+  <form onsubmit="generateBarcode(); return false;" id="barcodeForm" style="display:flex; justify-content:center; align-items:center; gap:8px; margin-bottom:0;">
+    <input type="text" id="barcodeInput" placeholder="예: 0123456" required maxlength="7" inputmode="numeric" style="width:220px; margin-bottom:0;" />
+    <button type="submit" style="margin-bottom:0;">바코드 생성</button>
   </form>
 
   <div id="result">
