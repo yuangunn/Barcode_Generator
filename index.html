@@ -357,20 +357,24 @@
       background: #ff3b30;
       color: white;
       padding: 16px;
-      margin: 0 auto 12px auto;
+      margin: 0;
       border-radius: 0;
-      width: 100vw;
+      width: 100%;
       box-sizing: border-box;
       font-size: 16px;
       transition: background 0.2s, color 0.2s;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1001;
     }
     #kakaoWarning {
       display: none;
-      position: relative;
-      width: 100vw;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 1001;
+      height: 53px;
+    }
+    /* 경고창이 표시될 때 본문 여백 조정 */
+    body.has-warning {
+      padding-top: 93px;
     }
     #browserSwitch {
       margin: 0 auto 18px auto;
@@ -815,8 +819,10 @@
       if (message) {
         warningDiv.style.display = 'block';
         warningDiv.innerHTML = `<div class="kakao-warning">${message}</div>`;
+        document.body.classList.add('has-warning');
       } else {
         warningDiv.style.display = 'none';
+        document.body.classList.remove('has-warning');
       }
     }
 
