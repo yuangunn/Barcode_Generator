@@ -398,15 +398,12 @@
       }
 
       const encoded = encodeURIComponent(input);
-      const url = `https://bwipjs-api.metafloor.com/?bcid=code128&text=${encoded}&scale=3&backgroundcolor=ffffff&paddingwidth=20&paddingheight=40`;
+      const url = `https://bwipjs-api.metafloor.com/?bcid=code128&text=${encoded}&includetext&textfont=Serif&textsize=10&textxalign=center&scale=3&backgroundcolor=ffffff&paddingwidth=20&paddingheight=40`;
 
       const img = document.getElementById("barcodeImage");
       img.src = url;
       img.style.display = "block";
       document.getElementById("barcodeGuide").style.display = "none";
-
-      // 입력값을 바코드 아래에 표시
-      document.getElementById("barcodeText").textContent = input;
 
       // 다운로드 버튼 표시
       const downloadBtn = document.getElementById("downloadBtn");
