@@ -15,7 +15,72 @@
       text-align: center;
       padding: 40px 20px;
       background-color: #f9f9f9;
+      color: #333;
       margin: 0;
+      transition: background 0.2s, color 0.2s;
+    }
+    input[type="text"] {
+      width: 80%;
+      padding: 12px;
+      font-size: 16px;
+      margin-bottom: 12px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #007aff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    img {
+      display: block;
+      margin: 30px auto 0;
+      max-width: 100%;
+      background-color: #ffffff;
+      transition: background 0.2s;
+    }
+    #barcodeGuide {
+      margin-top: 16px;
+      font-size: 14px;
+      color: #555;
+      transition: color 0.2s;
+    }
+    footer {
+      margin-top: 40px;
+      font-size: 14px;
+      color: #888;
+      transition: color 0.2s;
+    }
+    #installSection {
+      margin-top: 40px;
+    }
+    .ios-guide {
+      background: #fffbe2;
+      border: 1px solid #ffe58f;
+      padding: 16px;
+      border-radius: 8px;
+      color: #b38f00;
+      margin: 0 auto;
+      width: 80%;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .kakao-warning {
+      background: #ff3b30;
+      color: white;
+      padding: 16px;
+      margin: 0 auto 12px auto;
+      border-radius: 0;
+      width: 100vw;
+      box-sizing: border-box;
+      font-size: 16px;
+      transition: background 0.2s, color 0.2s;
     }
     #kakaoWarning {
       display: none;
@@ -24,16 +89,6 @@
       left: 50%;
       transform: translateX(-50%);
       z-index: 1001;
-    }
-    .kakao-warning {
-      background: #ff3b30;
-      color: white;
-      padding: 16px 0;
-      font-size: 16px;
-      width: 100vw;
-      margin: 0 auto 12px auto;
-      border-radius: 0;
-      box-sizing: border-box;
     }
     #browserSwitch {
       margin: 0 auto 18px auto;
@@ -51,50 +106,79 @@
       border-radius: 6px;
       color: #fff;
       cursor: pointer;
+      transition: background 0.2s;
     }
-    /* 이하 기존 스타일 유지 */
-    input[type="text"] {
-      width: 80%;
-      padding: 12px;
-      font-size: 16px;
-      margin-bottom: 12px;
+    /* 다크 모드 스타일 */
+    body.dark, body[data-theme="dark"] {
+      background-color: #1a1a1a;
+      color: #e0e0e0;
     }
-    button:not(.browser-btn) {
-      padding: 12px 24px;
-      font-size: 16px;
-      background-color: #007aff;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
+    body.dark input[type="text"], body[data-theme="dark"] input[type="text"] {
+      background: #2d2d2d;
+      border-color: #404040;
+      color: #e0e0e0;
     }
-    img {
-      display: block;
-      margin: 30px auto 0;
-      max-width: 100%;
-      background-color: #ffffff;
+    body.dark button:not(.browser-btn), body[data-theme="dark"] button:not(.browser-btn) {
+      background-color: #0a84ff;
     }
-    #barcodeGuide {
-      margin-top: 16px;
-      font-size: 14px;
-      color: #555;
+    body.dark img, body[data-theme="dark"] img {
+      background-color: #333;
     }
-    footer {
-      margin-top: 40px;
-      font-size: 14px;
-      color: #888;
+    body.dark #barcodeGuide, body[data-theme="dark"] #barcodeGuide {
+      color: #a0a0a0;
     }
-    #installSection {
-      margin-top: 40px;
+    body.dark footer, body[data-theme="dark"] footer {
+      color: #707070;
     }
-    .ios-guide {
-      background: #fffbe2;
-      border: 1px solid #ffe58f;
-      padding: 16px;
+    body.dark .ios-guide, body[data-theme="dark"] .ios-guide {
+      background: #2d2d00;
+      border-color: #404000;
+      color: #d0d000;
+    }
+    body.dark .kakao-warning, body[data-theme="dark"] .kakao-warning {
+      background: #c62828;
+    }
+    body.dark .browser-btn, body[data-theme="dark"] .browser-btn {
+      background: #2e7d32 !important;
+    }
+    /* 다크모드/라이트모드 선택상자 */
+    #themeSelectorBox {
+      position: fixed;
+      left: 16px;
+      bottom: 16px;
+      z-index: 2000;
+      background: rgba(255,255,255,0.85);
       border-radius: 8px;
-      color: #b38f00;
-      margin: 0 auto;
-      width: 80%;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 8px 12px;
+      font-size: 14px;
+      color: #444;
+      transition: background 0.2s, color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    @media (prefers-color-scheme: dark) {
+      #themeSelectorBox {
+        background: rgba(30,30,30,0.92);
+        color: #eee;
+      }
+    }
+    body.dark #themeSelectorBox, body[data-theme="dark"] #themeSelectorBox {
+      background: rgba(30,30,30,0.92);
+      color: #eee;
+    }
+    body.light #themeSelectorBox, body[data-theme="light"] #themeSelectorBox {
+      background: rgba(255,255,255,0.85);
+      color: #444;
+    }
+    #themeSelector {
+      font-size: 14px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid #bbb;
+      background: inherit;
+      color: inherit;
     }
   </style>
 </head>
@@ -103,6 +187,15 @@
   <div id="kakaoWarning"></div>
   <!-- 브라우저 전환 버튼(경고 아래, 본문 위) -->
   <div id="browserSwitch"></div>
+  <!-- 다크/라이트/시스템 선택상자 -->
+  <div id="themeSelectorBox">
+    <label for="themeSelector" style="font-weight:bold;">테마</label>
+    <select id="themeSelector">
+      <option value="auto">시스템 자동</option>
+      <option value="light">라이트모드</option>
+      <option value="dark">다크모드</option>
+    </select>
+  </div>
 
   <h1>💉 직번 바코드 생성기 🩺</h1>
   <p>텍스트를 입력하고 바코드를 생성하세요.</p>
@@ -125,6 +218,7 @@
   </footer>
 
   <script>
+    // 브라우저/OS 감지 함수
     function isAndroid() { return /Android/i.test(navigator.userAgent); }
     function isiOS() { return /iPhone|iPad|iPod/i.test(navigator.userAgent); }
     function isChrome() { return /Chrome/i.test(navigator.userAgent) && !/SamsungBrowser/i.test(navigator.userAgent); }
@@ -207,6 +301,7 @@
       }
     }
 
+    // 웹앱(PWA) 실행 여부 확인
     function isStandalone() {
       return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
         || window.navigator.standalone === true;
@@ -237,6 +332,9 @@
           </div>
         `;
       }
+
+      // 테마 선택 초기화
+      initThemeSelector();
     });
 
     function generateBarcode() {
@@ -271,6 +369,40 @@
         });
       }
     });
+
+    // 다크/라이트/시스템 테마 선택 로직
+    function setTheme(mode) {
+      document.body.classList.remove('light', 'dark');
+      document.body.removeAttribute('data-theme');
+      if (mode === 'dark') {
+        document.body.classList.add('dark');
+        document.body.setAttribute('data-theme', 'dark');
+      } else if (mode === 'light') {
+        document.body.classList.add('light');
+        document.body.setAttribute('data-theme', 'light');
+      }
+      // 'auto'면 클래스/속성 제거 → 시스템 설정 따름
+    }
+
+    function initThemeSelector() {
+      const selector = document.getElementById('themeSelector');
+      // 저장된 테마 불러오기
+      const saved = localStorage.getItem('theme-mode') || 'auto';
+      selector.value = saved;
+      setTheme(saved);
+
+      selector.addEventListener('change', function() {
+        const mode = this.value;
+        setTheme(mode);
+        localStorage.setItem('theme-mode', mode);
+      });
+
+      // 시스템 설정이 바뀌면 'auto'일 때만 반영
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+        const mode = localStorage.getItem('theme-mode') || 'auto';
+        if (mode === 'auto') setTheme('auto');
+      });
+    }
   </script>
 </body>
 </html>
