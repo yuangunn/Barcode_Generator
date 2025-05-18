@@ -609,9 +609,19 @@
       cursor: pointer;
       color: #666;
       margin-left: 4px;
+      font-size: 16px;
+      transition: all 0.3s ease;
     }
 
     .favorite-btn.active {
+      color: #FFD700;
+    }
+
+    body.dark .favorite-btn, body[data-theme="dark"] .favorite-btn {
+      color: #888;
+    }
+
+    body.dark .favorite-btn.active, body[data-theme="dark"] .favorite-btn.active {
       color: #FFD700;
     }
 
@@ -1096,7 +1106,7 @@
         favorites.forEach(barcode => {
           const btn = document.createElement('button');
           btn.className = 'barcode-button';
-          btn.innerHTML = `${barcode} <button class="favorite-btn active" onclick="event.stopPropagation(); toggleFavorite('${barcode}')">⭐</button>`;
+          btn.innerHTML = `${barcode} <button class="favorite-btn active" onclick="event.stopPropagation(); toggleFavorite('${barcode}')">★</button>`;
           btn.onclick = () => setBarcodeInput(barcode);
           favoritesContainer.appendChild(btn);
         });
@@ -1111,7 +1121,7 @@
           if (!favorites.includes(barcode)) { // 즐겨찾기에 없는 항목만 표시
             const btn = document.createElement('button');
             btn.className = 'barcode-button';
-            btn.innerHTML = `${barcode} <button class="favorite-btn" onclick="event.stopPropagation(); toggleFavorite('${barcode}')">⭐</button>`;
+            btn.innerHTML = `${barcode} <button class="favorite-btn" onclick="event.stopPropagation(); toggleFavorite('${barcode}')">☆</button>`;
             btn.onclick = () => setBarcodeInput(barcode);
             recentsContainer.appendChild(btn);
           }
