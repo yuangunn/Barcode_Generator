@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>직번 바코드 생성기</title>
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="apple-mobile-web-app-title" content="바코드 생성기" />
+  <link rel="manifest" href="manifest.json" />
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 40px 20px;
+      background-color: #f9f9f9;
+      margin: 0;
+    }
+    input[type="text"] {
+      width: 80%;
+      padding: 12px;
+      font-size: 16px;
+      margin-bottom: 12px;
+    }
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #007aff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    img {
+      margin-top: 30px;
+      max-width: 100%;
+      background-color: #ffffff;
+      padding: 20px;
+    }
+    footer {
+      margin-top: 40px;
+      font-size: 14px;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <h1>📦 직번 바코드 생성기</h1>
+  <p>텍스트를 입력하고 바코드를 생성하세요.</p>
+
+  <form onsubmit="generateBarcode(); return false;">
+    <input type="text" id="barcodeInput" placeholder="예: 0123456" required />
+    <br />
+    <button type="submit">바코드 생성</button>
+  </form>
+
+  <div id="result">
+    <img id="barcodeImage" src="" alt="바코드 이미지" style="display: none;" />
+  </div>
+
+  <footer>
+    ⓒ made by yuangunn
+  </footer>
+
+  <script>
+    function generateBarcode() {
+      const input = document.getElementById("barcodeInput").value.trim();
+      if (!input) return;
+      const encoded = encodeURIComponent(input);
+      const url = `https://bwipjs-api.metafloor.com/?bcid=code128&text=${encoded}&scale=3&backgroundcolor=ffffff&paddingwidth=50&paddingheight=100`;
+
+      const img = document.getElementById("barcodeImage");
+      img.src = url;
+      img.style.display = "block";
+    }
+  </script>
+</body>
+</html>
