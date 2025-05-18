@@ -145,10 +145,14 @@
       if (html) container.innerHTML = html;
     }
 
-    // 크롬에서 열기 (Android)
+    // 크롬에서 열기 (Android) - about:blank 문제 해결
     function openInChrome() {
-      const url = encodeURIComponent(location.href.replace(/^https?:\/\//, ''));
-      window.location.href = `intent://${url}#Intent;scheme=https;package=com.android.chrome;end`;
+      const currentUrl = window.location.href;
+      // 프로토콜 제거
+      const urlWithoutProtocol = currentUrl.replace(/^https?:\/\//, '');
+      // 인텐트 URI 생성 (인코딩 없이 사용)
+      const intentUrl = `intent://${urlWithoutProtocol}#Intent;scheme=https;package=com.android.chrome;end`;
+      window.location.href = intentUrl;
     }
 
     // 사파리에서 열기 (iOS, 주소 자동 복사)
