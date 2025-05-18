@@ -692,6 +692,107 @@
       color: white;
       border-color: transparent;
     }
+
+    /* 가이드 모달 스타일 */
+    #guideModal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 3000;
+    }
+
+    .guide-content {
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: left;
+      font-size: 14px;
+    }
+
+    .guide-content h2 {
+      margin-top: 0;
+      color: #0063B2;
+      font-size: 1.3em;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .guide-section {
+      margin-bottom: 16px;
+    }
+
+    .guide-section h3 {
+      color: #0063B2;
+      font-size: 1em;
+      margin-bottom: 6px;
+    }
+
+    .guide-section ul {
+      margin: 0;
+      padding-left: 20px;
+      list-style-type: none;
+    }
+
+    .guide-section li {
+      margin-bottom: 6px;
+      position: relative;
+      line-height: 1.4;
+      font-size: 0.95em;
+    }
+
+    .guide-section li::before {
+      content: "•";
+      color: #0063B2;
+      position: absolute;
+      left: -15px;
+      font-size: 1.1em;
+    }
+
+    .modal-buttons {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .modal-buttons button {
+      font-size: 14px;
+      padding: 8px 20px;
+    }
+
+    body.dark .guide-content, body[data-theme="dark"] .guide-content {
+      background: #2d2d2d;
+      color: #e0e0e0;
+    }
+
+    #helpBtn {
+      position: fixed;
+      right: 16px;
+      bottom: 70px;
+      z-index: 2000;
+      background: rgba(255,255,255,0.85);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 8px 12px;
+      font-size: 14px;
+      color: #444;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    body.dark #helpBtn, body[data-theme="dark"] #helpBtn {
+      background: rgba(30,30,30,0.92);
+      color: #e0e0e0;
+    }
   </style>
 </head>
 <body>
@@ -731,11 +832,55 @@
     </div>
   </div>
 
+  <!-- 도움말 버튼 추가 -->
+  <button id="helpBtn">❓ 도움말</button>
+
+  <!-- 가이드 모달 -->
+  <div id="guideModal">
+    <div class="guide-content">
+      <h2>💡 바코드 생성기 사용 가이드</h2>
+      
+      <div class="guide-section">
+        <h3>📱 기본 사용법</h3>
+        <ul>
+          <li>숫자만 입력 가능합니다 (최대 7자리)</li>
+          <li>바코드 생성 후 크기 조절이 가능합니다</li>
+          <li>생성된 바코드는 이미지로 저장하거나 공유할 수 있습니다</li>
+          <li>자주 사용하는 바코드는 즐겨찾기(★)에 등록하세요</li>
+        </ul>
+      </div>
+
+      <div class="guide-section">
+        <h3>⚡ 편리한 기능</h3>
+        <ul>
+          <li>홈 화면에 추가하여 앱처럼 사용할 수 있습니다</li>
+          <li>다크모드를 지원합니다 (시스템 설정 연동 가능)</li>
+          <li>최근 생성한 바코드 5개가 자동으로 저장됩니다</li>
+          <li>즐겨찾기한 바코드는 영구적으로 저장됩니다</li>
+        </ul>
+      </div>
+
+      <div class="guide-section">
+        <h3>⚠️ 주의사항</h3>
+        <ul>
+          <li>카카오톡 인앱 브라우저에서는 일부 기능이 제한됩니다</li>
+          <li>원활한 사용을 위해 기본 브라우저 사용을 권장합니다</li>
+          <li>브라우저 데이터 삭제 시 저장된 바코드가 삭제될 수 있습니다</li>
+          <li>Code-128 형식으로만 바코드가 생성됩니다</li>
+        </ul>
+      </div>
+
+      <div class="modal-buttons">
+        <button onclick="closeGuideModal()">확인</button>
+      </div>
+    </div>
+  </div>
+
   <h1>💉 바코드 생성기 🩺</h1>
   <p>텍스트를 입력하고 바코드를 생성하세요.</p>
 
   <form onsubmit="generateBarcode(); return false;" id="barcodeForm" style="display:flex; justify-content:center; align-items:center; gap:8px; margin-bottom:0;">
-    <input type="text" id="barcodeInput" placeholder="예: 0123456" required maxlength="7" inputmode="numeric" style="width:220px; margin-bottom:0;" />
+    <input type="text" id="barcodeInput" placeholder="직번을 입력하세요(ex. 0123456)" required maxlength="7" inputmode="numeric" style="width:220px; margin-bottom:0;" />
     <button type="submit" style="margin-bottom:0;">바코드 생성</button>
   </form>
 
@@ -1234,6 +1379,33 @@
       }
 
       document.getElementById('shareModal').style.display = 'none';
+    }
+
+    // 가이드 모달 관련 함수
+    function showGuideModal() {
+      document.getElementById('guideModal').style.display = 'block';
+    }
+
+    function closeGuideModal() {
+      document.getElementById('guideModal').style.display = 'none';
+    }
+
+    // 도움말 버튼 이벤트 리스너
+    document.getElementById('helpBtn').addEventListener('click', showGuideModal);
+
+    // 모달 외부 클릭 시 닫기
+    document.getElementById('guideModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeGuideModal();
+      }
+    });
+
+    // 첫 방문 시 가이드 모달 자동 표시
+    if (!localStorage.getItem('guide-shown')) {
+      window.addEventListener('DOMContentLoaded', function() {
+        setTimeout(showGuideModal, 1000);
+        localStorage.setItem('guide-shown', 'true');
+      });
     }
   </script>
 </body>
