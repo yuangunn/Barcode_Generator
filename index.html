@@ -52,6 +52,12 @@
       color: #555;
       transition: color 0.2s;
     }
+    #barcodeText {
+      margin-top: 12px;
+      font-size: 18px;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
     footer {
       margin-top: 40px;
       font-size: 14px;
@@ -108,6 +114,35 @@
       cursor: pointer;
       transition: background 0.2s;
     }
+    #recentBarcodes {
+      margin: 20px 0;
+      font-size: 15px;
+    }
+    #recentBarcodes button {
+      background: #f1f1f1;
+      color: #333;
+      border: 1px solid #bbb;
+      margin: 0 4px 4px 0;
+      padding: 5px 14px;
+      border-radius: 4px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    #recentBarcodes button:hover {
+      background: #e0e0e0;
+    }
+    #downloadBtn {
+      margin-top: 12px;
+      display: none;
+      background: #ff9800;
+      color: #fff;
+      font-size: 15px;
+      padding: 10px 20px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+    }
     /* 다크 모드 스타일 */
     body.dark, body[data-theme="dark"] {
       background-color: #1a1a1a;
@@ -140,6 +175,18 @@
     }
     body.dark .browser-btn, body[data-theme="dark"] .browser-btn {
       background: #2e7d32 !important;
+    }
+    body.dark #recentBarcodes button, body[data-theme="dark"] #recentBarcodes button {
+      background: #333;
+      color: #e0e0e0;
+      border-color: #555;
+    }
+    body.dark #recentBarcodes button:hover, body[data-theme="dark"] #recentBarcodes button:hover {
+      background: #444;
+    }
+    body.dark #downloadBtn, body[data-theme="dark"] #downloadBtn {
+      background: #ffa726;
+      color: #222;
     }
     /* 다크모드/라이트모드 선택상자 */
     #themeSelectorBox {
@@ -201,14 +248,18 @@
   <p>텍스트를 입력하고 바코드를 생성하세요.</p>
 
   <form onsubmit="generateBarcode(); return false;">
-    <input type="text" id="barcodeInput" placeholder="예: 0123456" required />
+    <input type="text" id="barcodeInput" placeholder="예: 0123456" required maxlength="7" inputmode="numeric" />
     <br />
     <button type="submit">바코드 생성</button>
   </form>
 
+  <div id="recentBarcodes"></div>
+
   <div id="result">
     <div id="barcodeGuide">💫이 사이트를 홈 화면에 추가하면 웹앱형태로 이용 가능합니다!💫</div>
     <img id="barcodeImage" src="" alt="바코드 이미지" style="display: none;" />
+    <div id="barcodeText"></div>
+    <button id="downloadBtn">이미지 다운로드</button>
   </div>
 
   <div id="installSection" style="display: none;"></div>
@@ -313,6 +364,67 @@
       return isIOS && isSafari && !isStandalone();
     }
 
+    // 최근 바코드 저장/불러오기
+    function saveRecentBarcode(input) {
+      let recents = JSON.parse(localStorage.getItem('recent-barcodes') || '[]');
+      recents = recents.filter(x => x !== input); // 중복 제거
+      recents.unshift(input);
+      if (recents.length > 5) recents = recents.slice(0,5);
+      localStorage.setItem('recent-barcodes', JSON.stringify(recents));
+      renderRecentBarcodes();
+    }
+    function renderRecentBarcodes() {
+      const recents = JSON.parse(localStorage.getItem('recent-barcodes') || '[]');
+      const container = document.getElementById('recentBarcodes');
+      if (recents.length === 0) {
+        container.innerHTML = '';
+        return;
+      }
+      container.innerHTML = '<b>최근 바코드:</b> ' + recents.map(x =>
+        `<button type="button" onclick="setBarcodeInput('${x}')">${x}</button>`
+      ).join(' ');
+    }
+    function setBarcodeInput(val) {
+      document.getElementById('barcodeInput').value = val;
+      generateBarcode();
+    }
+
+    // 바코드 생성 및 유효성 검사 + 다운로드 버튼 + 입력값 표시
+    function generateBarcode() {
+      const input = document.getElementById("barcodeInput").value.trim();
+      // 7자리 숫자만 허용
+      if (!/^\d{7}$/.test(input)) {
+        alert("직번은 7자리 숫자여야 합니다.");
+        return;
+      }
+
+      const encoded = encodeURIComponent(input);
+      const url = `https://bwipjs-api.metafloor.com/?bcid=code128&text=${encoded}&scale=3&backgroundcolor=ffffff&paddingwidth=20&paddingheight=40`;
+
+      const img = document.getElementById("barcodeImage");
+      img.src = url;
+      img.style.display = "block";
+      document.getElementById("barcodeGuide").style.display = "none";
+
+      // 입력값을 바코드 아래에 표시
+      document.getElementById("barcodeText").textContent = input;
+
+      // 다운로드 버튼 표시
+      const downloadBtn = document.getElementById("downloadBtn");
+      downloadBtn.style.display = "inline-block";
+      downloadBtn.onclick = function() {
+        const a = document.createElement('a');
+        a.href = img.src;
+        a.download = `barcode_${input}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      };
+
+      // 최근 바코드 저장
+      saveRecentBarcode(input);
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
       showBrowserWarning();
       createBrowserSwitch();
@@ -335,20 +447,13 @@
 
       // 테마 선택 초기화
       initThemeSelector();
+
+      // 최근 바코드 표시
+      renderRecentBarcodes();
+
+      // 다운로드 버튼 숨김(초기)
+      document.getElementById("downloadBtn").style.display = "none";
     });
-
-    function generateBarcode() {
-      const input = document.getElementById("barcodeInput").value.trim();
-      if (!input) return;
-
-      const encoded = encodeURIComponent(input);
-      const url = `https://bwipjs-api.metafloor.com/?bcid=code128&text=${encoded}&scale=3&backgroundcolor=ffffff&paddingwidth=20&paddingheight=40`;
-
-      const img = document.getElementById("barcodeImage");
-      img.src = url;
-      img.style.display = "block";
-      document.getElementById("barcodeGuide").style.display = "none";
-    }
 
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => {
