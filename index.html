@@ -895,15 +895,15 @@
     // 바코드 생성 및 유효성 검사 + 다운로드 버튼 + 입력값 표시
     function generateBarcode() {
       const input = document.getElementById("barcodeInput").value.trim();
-      // 7자리 숫자만 허용
-      if (!/^\d{7}$/.test(input)) {
-        alert("직번은 7자리 숫자여야 합니다.");
+      // 숫자만 허용하도록 수정
+      if (!/^\d+$/.test(input)) {
+        alert("숫자만 입력 가능합니다.");
         return;
       }
 
       const barcodeSize = localStorage.getItem('barcode-size') || '3';
       const encoded = encodeURIComponent(input);
-      const url = `https://bwipjs-api.metafloor.com/?bcid=code128&text=${encoded}&scale${barcodeSize}&backgroundcolor=ffffff&paddingwidth=20&paddingheight=40`;
+      const url = `https://bwipjs-api.metafloor.com/?bcid=code128&text=${encoded}&includetext&textfont=Serif&textsize=10&textxalign=center&scale=${barcodeSize}&backgroundcolor=ffffff&paddingwidth=20&paddingheight=40`;
 
       const img = document.getElementById("barcodeImage");
       img.src = url;
