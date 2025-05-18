@@ -905,7 +905,7 @@
 
       const barcodeSize = localStorage.getItem('barcode-size') || '3';
       const encoded = encodeURIComponent(input);
-      const url = `https://bwipjs-api.metafloor.com/?bcid=code128&text=${encoded}&includetext&textfont=Serif&textsize=10&textxalign=center&scale=${barcodeSize}&backgroundcolor=ffffff&paddingwidth=20&paddingheight=40`;
+      const url = `https://bwipjs-api.metafloor.com/?bcid=code128&text=${encoded}&scale=${barcodeSize}&backgroundcolor=ffffff&paddingwidth=20&paddingheight=40`;
 
       const img = document.getElementById("barcodeImage");
       img.src = url;
