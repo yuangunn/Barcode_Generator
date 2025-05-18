@@ -85,16 +85,30 @@
   </footer>
 
   <script>
+    // 웹앱(PWA) 실행 여부 확인 함수
+    function isStandalone() {
+      // iOS: window.navigator.standalone, Android: window.matchMedia
+      return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
+        || window.navigator.standalone === true;
+    }
+
     // iOS Safari 브라우저에서만 true, PWA(웹앱)에서는 false
     function isIosSafariOnly() {
       const ua = window.navigator.userAgent;
       const isIOS = /iP(ad|hone|od)/.test(ua) && !window.MSStream;
       const isSafari = /Safari/.test(ua) && !/CriOS/.test(ua) && !/FxiOS/.test(ua);
-      const isStandalone = window.navigator.standalone === true;
-      return isIOS && isSafari && !isStandalone;
+      const isStandaloneMode = window.navigator.standalone === true;
+      return isIOS && isSafari && !isStandaloneMode;
     }
 
     window.addEventListener('DOMContentLoaded', () => {
+      // 웹앱(PWA) 실행 시 안내문구 숨기기
+      if (isStandalone()) {
+        const guide = document.getElementById('barcodeGuide');
+        if (guide) guide.style.display = 'none';
+      }
+
+      // iOS Safari 브라우저에서만 홈화면 추가 안내 표시
       const installSection = document.getElementById('installSection');
       if (isIosSafariOnly()) {
         installSection.style.display = 'block';
