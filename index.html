@@ -33,10 +33,10 @@
       cursor: pointer;
     }
     img {
-      margin-top: 30px;
+      display: block;
+      margin: 30px auto 0;
       max-width: 100%;
       background-color: #ffffff;
-      padding: 20px;
     }
     footer {
       margin-top: 40px;
@@ -46,7 +46,7 @@
   </style>
 </head>
 <body>
-  <h1>📦 직번 바코드 생성기</h1>
+  <h1>💉 직번 바코드 생성기 🩺</h1>
   <p>텍스트를 입력하고 바코드를 생성하세요.</p>
 
   <form onsubmit="generateBarcode(); return false;">
@@ -68,7 +68,7 @@
       const input = document.getElementById("barcodeInput").value.trim();
       if (!input) return;
       const encoded = encodeURIComponent(input);
-      const url = `https://bwipjs-api.metafloor.com/?bcid=code128&text=${encoded}&scale=3&backgroundcolor=ffffff&paddingwidth=50&paddingheight=100`;
+      const url = `https://bwipjs-api.metafloor.com/?bcid=code128&text=${encoded}&scale=3&backgroundcolor=ffffff&paddingwidth=20&paddingheight=40`;
 
       const img = document.getElementById("barcodeImage");
       img.src = url;
