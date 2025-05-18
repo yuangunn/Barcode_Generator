@@ -38,6 +38,11 @@
       max-width: 100%;
       background-color: #ffffff;
     }
+    #barcodeGuide {
+      margin-top: 16px;
+      font-size: 14px;
+      color: #555;
+    }
     footer {
       margin-top: 40px;
       font-size: 14px;
@@ -56,6 +61,8 @@
   </form>
 
   <div id="result">
+    <div id="barcodeGuide">바코드를 입력하고 생성 버튼을 누르세요.</div>
+	<div id="barcodeGuide">💫이 사이트를 홈화면에 추가하면 웹앱형태로 이용 가능합니다!💫</div>
     <img id="barcodeImage" src="" alt="바코드 이미지" style="display: none;" />
   </div>
 
@@ -67,12 +74,16 @@
     function generateBarcode() {
       const input = document.getElementById("barcodeInput").value.trim();
       if (!input) return;
+
       const encoded = encodeURIComponent(input);
       const url = `https://bwipjs-api.metafloor.com/?bcid=code128&text=${encoded}&scale=3&backgroundcolor=ffffff&paddingwidth=20&paddingheight=40`;
 
       const img = document.getElementById("barcodeImage");
       img.src = url;
       img.style.display = "block";
+
+      const guide = document.getElementById("barcodeGuide");
+      guide.style.display = "none";
     }
   </script>
 </body>
