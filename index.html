@@ -10,7 +10,6 @@
   <meta name="apple-mobile-web-app-title" content="직번 바코드 생성기" />
   <link rel="manifest" href="manifest.json" />
   <style>
-    /* [기존 CSS 유지] */
     body {
       font-family: sans-serif;
       text-align: center;
@@ -52,7 +51,6 @@
     #installSection {
       margin-top: 40px;
     }
-    /* iOS 안내 메시지 스타일 추가 */
     .ios-guide {
       background: #fffbe2;
       border: 1px solid #ffe58f;
@@ -87,17 +85,18 @@
   </footer>
 
   <script>
-    // iOS Safari 감지 함수
-    function isIosSafari() {
+    // iOS Safari 브라우저에서만 true, PWA(웹앱)에서는 false
+    function isIosSafariOnly() {
       const ua = window.navigator.userAgent;
-      return /iP(ad|hone|od)/.test(ua) && /Safari/.test(ua) && !/CriOS/.test(ua);
+      const isIOS = /iP(ad|hone|od)/.test(ua) && !window.MSStream;
+      const isSafari = /Safari/.test(ua) && !/CriOS/.test(ua) && !/FxiOS/.test(ua);
+      const isStandalone = window.navigator.standalone === true;
+      return isIOS && isSafari && !isStandalone;
     }
 
-    // iOS 안내 메시지 표시
     window.addEventListener('DOMContentLoaded', () => {
       const installSection = document.getElementById('installSection');
-      
-      if (isIosSafari()) {
+      if (isIosSafariOnly()) {
         installSection.style.display = 'block';
         installSection.innerHTML = `
           <div class="ios-guide">
@@ -109,7 +108,7 @@
       }
     });
 
-    // 바코드 생성 함수 [기존 유지]
+    // 바코드 생성 함수
     function generateBarcode() {
       const input = document.getElementById("barcodeInput").value.trim();
       if (!input) return;
@@ -125,7 +124,7 @@
       guide.style.display = "none";
     }
 
-    // Android용 PWA 설치 로직 [기존 유지]
+    // Android용 PWA 설치 로직
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
