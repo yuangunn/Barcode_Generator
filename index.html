@@ -17,13 +17,49 @@
       background-color: #f9f9f9;
       margin: 0;
     }
+    #kakaoWarning {
+      display: none;
+      position: relative;
+      width: 100vw;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1001;
+    }
+    .kakao-warning {
+      background: #ff3b30;
+      color: white;
+      padding: 16px 0;
+      font-size: 16px;
+      width: 100vw;
+      margin: 0 auto 12px auto;
+      border-radius: 0;
+      box-sizing: border-box;
+    }
+    #browserSwitch {
+      margin: 0 auto 18px auto;
+      display: flex;
+      justify-content: center;
+      z-index: 1000;
+      position: relative;
+    }
+    .browser-btn {
+      background: #4CAF50 !important;
+      margin: 0 5px;
+      padding: 8px 16px !important;
+      font-size: 14px !important;
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      cursor: pointer;
+    }
+    /* 이하 기존 스타일 유지 */
     input[type="text"] {
       width: 80%;
       padding: 12px;
       font-size: 16px;
       margin-bottom: 12px;
     }
-    button {
+    button:not(.browser-btn) {
       padding: 12px 24px;
       font-size: 16px;
       background-color: #007aff;
@@ -60,36 +96,13 @@
       margin: 0 auto;
       width: 80%;
     }
-    .kakao-warning {
-      background: #ff3b30;
-      color: white;
-      padding: 16px;
-      margin: -40px -20px 20px;
-      border-radius: 0;
-    }
-    #browserSwitch {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      z-index: 1000;
-    }
-    .browser-btn {
-      background: #4CAF50 !important;
-      margin: 5px;
-      padding: 8px 16px !important;
-      font-size: 14px !important;
-      border: none;
-      border-radius: 6px;
-      color: #fff;
-      cursor: pointer;
-    }
   </style>
 </head>
 <body>
-  <!-- 브라우저 전환 버튼 -->
+  <!-- 경고 메시지(페이지 최상단) -->
+  <div id="kakaoWarning"></div>
+  <!-- 브라우저 전환 버튼(경고 아래, 본문 위) -->
   <div id="browserSwitch"></div>
-  <!-- 카카오톡 브라우저 경고 메시지 -->
-  <div id="kakaoWarning" style="display: none;"></div>
 
   <h1>💉 직번 바코드 생성기 🩺</h1>
   <p>텍스트를 입력하고 바코드를 생성하세요.</p>
@@ -105,7 +118,6 @@
     <img id="barcodeImage" src="" alt="바코드 이미지" style="display: none;" />
   </div>
 
-  <!-- PWA 설치 안내 섹션 -->
   <div id="installSection" style="display: none;"></div>
 
   <footer>
@@ -113,44 +125,60 @@
   </footer>
 
   <script>
-    // 브라우저/OS 감지 함수들
-    function isAndroid() {
-      return /Android/i.test(navigator.userAgent);
-    }
-    function isiOS() {
-      return /iPhone|iPad|iPod/i.test(navigator.userAgent);
-    }
-    function isChrome() {
-      return /Chrome/i.test(navigator.userAgent) && !/SamsungBrowser/i.test(navigator.userAgent);
-    }
-    function isSafari() {
-      return /Safari/i.test(navigator.userAgent) && !/CriOS|FxiOS/i.test(navigator.userAgent);
-    }
+    function isAndroid() { return /Android/i.test(navigator.userAgent); }
+    function isiOS() { return /iPhone|iPad|iPod/i.test(navigator.userAgent); }
+    function isChrome() { return /Chrome/i.test(navigator.userAgent) && !/SamsungBrowser/i.test(navigator.userAgent); }
+    function isSafari() { return /Safari/i.test(navigator.userAgent) && !/CriOS|FxiOS/i.test(navigator.userAgent); }
+    function isKakaoTalkBrowser() { return /KAKAOTALK/i.test(navigator.userAgent); }
+    function isInstagramBrowser() { return /Instagram/i.test(navigator.userAgent); }
+    function isInAppBrowser() { return isKakaoTalkBrowser() || isInstagramBrowser(); }
 
-    // 브라우저 전환 버튼 생성
+    // 브라우저 전환 버튼 생성 (중복 방지)
     function createBrowserSwitch() {
       const container = document.getElementById('browserSwitch');
       let html = '';
 
-      // Android + Chrome 아닌 경우
-      if (isAndroid() && !isChrome()) {
-        html += `<button class="browser-btn" onclick="openInChrome()">크롬에서 열기</button>`;
+      if (isInAppBrowser()) {
+        if (isAndroid()) {
+          html += `<button class="browser-btn" onclick="openInChrome()">크롬에서 열기</button>`;
+        } else if (isiOS()) {
+          html += `<button class="browser-btn" onclick="openInSafari()">사파리에서 열기(주소 복사)</button>`;
+        }
+      } else {
+        if (isAndroid() && !isChrome()) {
+          html += `<button class="browser-btn" onclick="openInChrome()">크롬에서 열기</button>`;
+        } else if (isiOS() && !isSafari()) {
+          html += `<button class="browser-btn" onclick="openInSafari()">사파리에서 열기(주소 복사)</button>`;
+        }
       }
-
-      // iOS + Safari 아닌 경우
-      if (isiOS() && !isSafari()) {
-        html += `<button class="browser-btn" onclick="openInSafari()">사파리에서 열기(주소 복사)</button>`;
-      }
-
-      if (html) container.innerHTML = html;
+      container.innerHTML = html;
     }
 
-    // 크롬에서 열기 (Android) - about:blank 문제 해결
+    // 경고 메시지 생성 (중복 방지)
+    function showBrowserWarning() {
+      const warningDiv = document.getElementById('kakaoWarning');
+      let message = '';
+
+      if (isInAppBrowser()) {
+        message = `⚠️ 인앱 브라우저에서는 기능이 제한됩니다.<br><b>기본 브라우저</b>를 사용해주세요!`;
+      } else if (isAndroid() && !isChrome()) {
+        message = `⚠️ 현재 브라우저에서는 일부 기능이 제한됩니다.<br><b>크롬</b>에서 열어주세요!`;
+      } else if (isiOS() && !isSafari()) {
+        message = `⚠️ 현재 브라우저에서는 일부 기능이 제한됩니다.<br><b>사파리</b>에서 열어주세요!`;
+      }
+
+      if (message) {
+        warningDiv.style.display = 'block';
+        warningDiv.innerHTML = `<div class="kakao-warning">${message}</div>`;
+      } else {
+        warningDiv.style.display = 'none';
+      }
+    }
+
+    // 크롬에서 열기 (Android)
     function openInChrome() {
       const currentUrl = window.location.href;
-      // 프로토콜 제거
       const urlWithoutProtocol = currentUrl.replace(/^https?:\/\//, '');
-      // 인텐트 URI 생성 (인코딩 없이 사용)
       const intentUrl = `intent://${urlWithoutProtocol}#Intent;scheme=https;package=com.android.chrome;end`;
       window.location.href = intentUrl;
     }
@@ -158,15 +186,13 @@
     // 사파리에서 열기 (iOS, 주소 자동 복사)
     function openInSafari() {
       const url = location.href;
-      // 클립보드 복사
       if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(url).then(function() {
+        navigator.clipboard.writeText(url).then(() => {
           alert('주소가 복사되었습니다!\n사파리에서 붙여넣기 해주세요.');
-        }, function() {
+        }).catch(() => {
           alert('주소 복사에 실패했습니다.\n아래 주소를 직접 복사해 주세요:\n' + url);
         });
       } else {
-        // 구형 브라우저 대응
         const temp = document.createElement('input');
         temp.value = url;
         document.body.appendChild(temp);
@@ -174,20 +200,17 @@
         try {
           document.execCommand('copy');
           alert('주소가 복사되었습니다!\n사파리에서 붙여넣기 해주세요.');
-        } catch (err) {
+        } catch {
           alert('주소 복사에 실패했습니다.\n아래 주소를 직접 복사해 주세요:\n' + url);
         }
         document.body.removeChild(temp);
       }
     }
 
-    // 웹앱(PWA) 실행 여부 확인
     function isStandalone() {
       return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
         || window.navigator.standalone === true;
     }
-
-    // iOS Safari 브라우저 감지
     function isIosSafariOnly() {
       const ua = window.navigator.userAgent;
       const isIOS = /iP(ad|hone|od)/.test(ua) && !window.MSStream;
@@ -195,33 +218,14 @@
       return isIOS && isSafari && !isStandalone();
     }
 
-    // 카카오톡 브라우저 감지
-    function isKakaoTalkBrowser() {
-      return /KAKAOTALK/i.test(navigator.userAgent);
-    }
-
-    // 초기 로드 시 실행
     window.addEventListener('DOMContentLoaded', () => {
+      showBrowserWarning();
       createBrowserSwitch();
 
-      // 카카오톡 브라우저 안내
-      if (isKakaoTalkBrowser()) {
-        const warningDiv = document.getElementById('kakaoWarning');
-        warningDiv.style.display = 'block';
-        warningDiv.innerHTML = `
-          <div class="kakao-warning">
-            ⚠️ 카카오톡 브라우저에서는 일부 기능이 제한됩니다.<br>
-            <b>기본 브라우저(사파리/크롬)</b>에서 열어주세요!
-          </div>
-        `;
-      }
-
-      // 웹앱 모드일 때 안내문구 숨기기
       if (isStandalone()) {
         document.getElementById('barcodeGuide').style.display = 'none';
       }
 
-      // iOS Safari 안내
       const installSection = document.getElementById('installSection');
       if (isIosSafariOnly()) {
         installSection.style.display = 'block';
@@ -235,7 +239,6 @@
       }
     });
 
-    // 바코드 생성 함수
     function generateBarcode() {
       const input = document.getElementById("barcodeInput").value.trim();
       if (!input) return;
@@ -249,7 +252,6 @@
       document.getElementById("barcodeGuide").style.display = "none";
     }
 
-    // Android용 PWA 설치 로직
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
