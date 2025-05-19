@@ -11,6 +11,7 @@
   <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)" />
   <meta name="apple-mobile-web-app-title" content="바코드 생성기" />
   <link rel="manifest" href="manifest.json" />
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -35,8 +36,8 @@
 
     p {
       color: #666;
-      margin-bottom: 15px;
-      font-size: 10px;
+      margin-bottom: 30px;
+      font-size: 16px;
     }
 
     input[type="text"] {
@@ -793,6 +794,28 @@
       background: rgba(30,30,30,0.92);
       color: #e0e0e0;
     }
+
+    #fixedBarcode {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      z-index: 1000;
+      display: none;
+    }
+
+    #fixedBarcode canvas {
+      height: 40px;
+    }
+
+    body.dark #fixedBarcode, body[data-theme="dark"] #fixedBarcode {
+      background: #2d2d2d;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
   </style>
 </head>
 <body>
@@ -863,17 +886,12 @@
       <div class="guide-section">
         <h3>⚠️ 주의사항</h3>
         <ul>
-          <li>인앱 브라우저에서는 일부 기능이 제한됩니다</li>
-          <li>원활한 사용을 위해기 웹앱 형태의 사용을 권장합니다</li>
-          <li>바코드 인식이 잘 안되는 경우 화면 밝기를 최대로 해주세요</li>
+          <li>카카오톡 인앱 브라우저에서는 일부 기능이 제한됩니다</li>
+          <li>원활한 사용을 위해 기본 브라우저 사용을 권장합니다</li>
           <li>브라우저 데이터 삭제 시 저장된 바코드가 삭제될 수 있습니다</li>
           <li>Code-128 형식으로만 바코드가 생성됩니다</li>
         </ul>
       </div>
-      
-      <div class="guide-section">
-        <h3>️❗️모든 책임은 최종 사용자 본인에게 있습니다❗️</h3>
-      </div> 
 
       <div class="modal-buttons">
         <button onclick="closeGuideModal()">확인</button>
@@ -882,6 +900,7 @@
   </div>
 
   <h1>💉 바코드 생성기 🩺</h1>
+  <p>텍스트를 입력하고 바코드를 생성하세요.</p>
 
   <form onsubmit="generateBarcode(); return false;" id="barcodeForm" style="display:flex; justify-content:center; align-items:center; gap:8px; margin-bottom:0;">
     <input type="text" id="barcodeInput" placeholder="직번을 입력하세요(ex. 0123456)" required maxlength="7" inputmode="numeric" style="width:220px; margin-bottom:0;" />
@@ -924,8 +943,6 @@
       </div>
     </div>
   </div>
-  
-  <p>※ 생성된 바코드는 사용자 책임 하에 사용되며, 본 앱은 이에 대한 책임을 지지 않습니다.</p>
 
   <div id="installSection" style="display: none;"></div>
 
@@ -934,6 +951,10 @@
       <span>✨ Created by yuangunn</span>
     </a>
   </footer>
+
+  <div id="fixedBarcode">
+    <canvas id="fixedBarcodeCanvas"></canvas>
+  </div>
 
   <script>
     // 브라우저/OS 감지 함수
@@ -1413,6 +1434,57 @@
         localStorage.setItem('guide-shown', 'true');
       });
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const savedEmployeeId = localStorage.getItem('employeeId');
+      if (savedEmployeeId) {
+        generateBarcode(savedEmployeeId);
+        document.getElementById('barcodeInput').value = savedEmployeeId;
+        showFixedBarcode(savedEmployeeId);
+      }
+    });
+
+    function generateBarcode(text) {
+      if (!text) return;
+      
+      localStorage.setItem('employeeId', text);
+      
+      JsBarcode("#barcode", text, {
+        format: "code128",
+        width: 2,
+        height: 100,
+        displayValue: true,
+        fontSize: 20,
+        margin: 10
+      });
+
+      showFixedBarcode(text);
+    }
+
+    function showFixedBarcode(text) {
+      const fixedBarcodeElement = document.getElementById('fixedBarcodeCanvas');
+      JsBarcode(fixedBarcodeElement, text, {
+        format: "code128",
+        width: 1,
+        height: 30,
+        displayValue: false,
+        margin: 5
+      });
+      document.getElementById('fixedBarcode').style.display = 'block';
+    }
+
+    document.getElementById('generateBtn').addEventListener('click', function() {
+      const text = document.getElementById('barcodeInput').value;
+      generateBarcode(text);
+    });
+
+    // 입력 필드에서 엔터 키 처리
+    document.getElementById('barcodeInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        const text = this.value;
+        generateBarcode(text);
+      }
+    });
   </script>
 </body>
 </html>
