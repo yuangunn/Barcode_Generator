@@ -1252,6 +1252,59 @@
 
     // 화면 밝기 관련 전역 변수
     let wakeLock = null;
+    let brightnessManager = null;
+
+    // 화면 밝기 최대로 설정
+    async function setMaxBrightness(enable) {
+      try {
+        if ('brightness' in screen) {
+          // Screen Brightness API 사용
+          if (enable) {
+            // 현재 밝기 저장
+            localStorage.setItem('previous-brightness', screen.brightness);
+            await screen.setBrightness(1.0); // 최대 밝기
+            console.log('화면 밝기가 최대로 설정되었습니다.');
+          } else {
+            // 이전 밝기로 복원
+            const prevBrightness = parseFloat(localStorage.getItem('previous-brightness') || 0.5);
+            await screen.setBrightness(prevBrightness);
+            console.log('화면 밝기가 이전 설정으로 복원되었습니다.');
+          }
+        } else if ('AmbientLightSensor' in window) {
+          // Ambient Light Sensor API를 통한 대체 구현
+          if (enable && !brightnessManager) {
+            brightnessManager = new AmbientLightSensor();
+            brightnessManager.onreading = () => {
+              document.body.style.filter = 'brightness(1.5)';
+            };
+            brightnessManager.start();
+          } else if (!enable && brightnessManager) {
+            brightnessManager.stop();
+            brightnessManager = null;
+            document.body.style.filter = '';
+          }
+        } else {
+          // CSS 필터를 사용한 대체 구현
+          if (enable) {
+            document.body.style.filter = 'brightness(1.5)';
+            document.body.style.backgroundColor = '#ffffff';
+          } else {
+            document.body.style.filter = '';
+            document.body.style.backgroundColor = '';
+          }
+        }
+      } catch (err) {
+        console.error('화면 밝기 조절 실패:', err);
+        // CSS 필터로 대체
+        if (enable) {
+          document.body.style.filter = 'brightness(1.5)';
+          document.body.style.backgroundColor = '#ffffff';
+        } else {
+          document.body.style.filter = '';
+          document.body.style.backgroundColor = '';
+        }
+      }
+    }
 
     // 화면 밝기 고정 함수
     async function setWakeLock(enable) {
@@ -1263,7 +1316,10 @@
       try {
         if (enable) {
           wakeLock = await navigator.wakeLock.request('screen');
-          console.log('화면 밝기가 고정되었습니다.');
+          console.log('화면 켜짐이 고정되었습니다.');
+          
+          // 화면 밝기 최대로 설정
+          await setMaxBrightness(true);
           
           // visibility 변경 시 다시 요청
           document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -1271,12 +1327,16 @@
           if (wakeLock) {
             await wakeLock.release();
             wakeLock = null;
-            console.log('화면 밝기 고정이 해제되었습니다.');
+            console.log('화면 켜짐 고정이 해제되었습니다.');
           }
+          
+          // 화면 밝기 원래대로 복원
+          await setMaxBrightness(false);
+          
           document.removeEventListener('visibilitychange', handleVisibilityChange);
         }
       } catch (err) {
-        console.error('화면 밝기 고정 설정 실패:', err);
+        console.error('화면 켜짐 고정 설정 실패:', err);
       }
     }
 
@@ -1287,12 +1347,23 @@
           JSON.parse(localStorage.getItem('app-settings')).screenBrightness === 'on') {
         try {
           wakeLock = await navigator.wakeLock.request('screen');
-          console.log('화면 밝기가 다시 고정되었습니다.');
+          console.log('화면 켜짐이 다시 고정되었습니다.');
+          
+          // 화면 밝기도 다시 최대로 설정
+          await setMaxBrightness(true);
         } catch (err) {
-          console.error('화면 밝기 재고정 실패:', err);
+          console.error('화면 켜짐 재고정 실패:', err);
         }
       }
     }
+
+    // 페이지 종료 시 정리
+    window.addEventListener('beforeunload', async () => {
+      if (wakeLock) {
+        await wakeLock.release();
+      }
+      await setMaxBrightness(false);
+    });
 
     function applyScreenSettings(settings) {
       // 화면 회전 설정
@@ -1391,4 +1462,5 @@
     });
   </script>
 </body>
+</html>
 </html>
