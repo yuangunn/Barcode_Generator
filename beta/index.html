@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>바코드 생성기</title>
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="theme-color" content="#f9f9f9" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)" />
+  <meta name="apple-mobile-web-app-title" content="바코드 생성기" />
+  <link rel="manifest" href="manifest.json" />
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      text-align: center;
+      padding: 40px 20px;
+      background-color: #f9f9f9;
+      color: #333;
+      margin: 0;
+      transition: background 0.2s, color 0.2s;
+      line-height: 1.6;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #0063B2, #0095FF);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      padding: 10px;
+    }
+
+    p {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 16px;
+    }
+
+    input[type="text"] {
+      width: 80%;
+      max-width: 300px;
+      padding: 15px;
+      font-size: 16px;
+      margin-bottom: 12px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #00205B;
+      box-shadow: 0 2px 12px rgba(0,32,91,0.15);
+    }
+
+    button {
+      padding: 15px 30px;
+      font-size: 16px;
+      background: linear-gradient(135deg, #0063B2, #0095FF);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0,32,91,0.2);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    img {
+      display: block;
+      margin: 30px auto 0;
+      max-width: 100%;
+      background-color: #ffffff;
+      transition: background 0.2s;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      padding: 20px;
+    }
+
+    #barcodeGuide {
+      margin: 24px auto;
+      font-size: 13px;
+      color: #666;
+      max-width: 400px;
+      padding: 16px;
+      background: linear-gradient(135deg, rgba(0,32,91,0.1), rgba(0,99,178,0.1));
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+
+    #barcodeText {
+      margin-top: 16px;
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      color: #0063B2;
+    }
+
+    #recentBarcodes {
+      margin: 24px 0;
+      padding: 0 16px;
+    }
+
+    #recentBarcodes button {
+      background: white;
+      color: #666;
+      border: 1px solid #ddd;
+      margin: 0 4px 8px 4px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    #recentBarcodes button:hover {
+      background: linear-gradient(135deg, #0063B2, #0095FF);
+      color: white;
+      border-color: transparent;
+    }
+
+    #downloadBtn {
+      margin-top: 16px;
+      background: linear-gradient(135deg, #0063B2, #0095FF);
+    }
+
+    /* 다크모드 스타일 개선 */
+    body.dark, body[data-theme="dark"] {
+      background-color: #1a1a1a;
+      color: #e0e0e0;
+    }
+
+    body.dark input[type="text"], body[data-theme="dark"] input[type="text"] {
+      background: #2d2d2d;
+      border-color: #404040;
+      color: #e0e0e0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    body.dark input[type="text"]:focus, body[data-theme="dark"] input[type="text"]:focus {
+      border-color: #0063B2;
+      box-shadow: 0 2px 12px rgba(0,99,178,0.2);
+    }
+
+    body.dark #barcodeGuide, body[data-theme="dark"] #barcodeGuide {
+      color: #a0a0a0;
+      background: linear-gradient(135deg, rgba(0,32,91,0.15), rgba(0,99,178,0.15));
+    }
+
+    body.dark #recentBarcodes button, body[data-theme="dark"] #recentBarcodes button {
+      background: #2d2d2d;
+      color: #e0e0e0;
+      border-color: #404040;
+    }
+
+    body.dark #recentBarcodes button:hover, body[data-theme="dark"] #recentBarcodes button:hover {
+      background: linear-gradient(135deg, #0063B2, #0095FF);
+      color: white;
+      border-color: transparent;
+    }
+
+    body.dark img, body[data-theme="dark"] img {
+      background-color: #2d2d2d;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    }
+
+    /* 설정 모달 스타일 개선 */
+    .modal-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 32px;
+      border-radius: 20px;
+      width: 85%;
+      max-width: 400px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+
+    .modal-content h2 {
+      margin: 0 0 24px 0;
+      font-size: 24px;
+      background: linear-gradient(135deg, #0063B2, #0095FF);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .settings-group {
+      margin-bottom: 24px;
+    }
+
+    .settings-group label {
+      display: block;
+      margin-bottom: 12px;
+      font-weight: 600;
+      color: #444;
+    }
+
+    .settings-group input[type="text"],
+    .settings-group select {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      background: white;
+      font-size: 15px;
+      color: #444;
+      transition: all 0.3s ease;
+    }
+
+    .settings-group input[type="text"]:focus,
+    .settings-group select:focus {
+      outline: none;
+      border-color: #6e8efb;
+      box-shadow: 0 2px 12px rgba(110,142,251,0.15);
+    }
+
+    body.dark .settings-group input[type="text"],
+    body.dark .settings-group select,
+    body[data-theme="dark"] .settings-group input[type="text"],
+    body[data-theme="dark"] .settings-group select {
+      background: #1a1a1a;
+      border-color: #404040;
+      color: #e0e0e0;
+    }
+
+    .modal-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .modal-buttons button {
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 15px;
+    }
+
+    #closeSettingsBtn {
+      background: #f1f1f1;
+      color: #666;
+      border: 1px solid #ddd;
+    }
+
+    #closeSettingsBtn:hover {
+      background: #e5e5e5;
+    }
+
+    body.dark .modal-content, body[data-theme="dark"] .modal-content {
+      background: #2d2d2d;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+
+    body.dark .settings-group label, body[data-theme="dark"] .settings-group label {
+      color: #e0e0e0;
+    }
+
+    body.dark #closeSettingsBtn, body[data-theme="dark"] #closeSettingsBtn {
+      background: #404040;
+      color: #e0e0e0;
+      border-color: #555;
+    }
+
+    body.dark #closeSettingsBtn:hover, body[data-theme="dark"] #closeSettingsBtn:hover {
+      background: #505050;
+    }
+
+    /* 폼 컨테이너 스타일 */
+    #barcodeForm {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    @media (min-width: 480px) {
+      #barcodeForm {
+        flex-direction: row;
+        justify-content: center;
+      }
+
+      input[type="text"] {
+        margin-bottom: 0;
+      }
+    }
+
+    /* 웹앱 상태일 때의 배경색 */
+    @media all and (display-mode: standalone) {
+      body {
+        background-color: #f9f9f9;
+      }
+      body.dark, body[data-theme="dark"] {
+        background-color: #1a1a1a;
+      }
+    }
+
+    /* iOS standalone 모드일 때의 배경색 */
+    body.standalone {
+      background-color: #f9f9f9;
+    }
+    body.standalone.dark, body.standalone[data-theme="dark"] {
+      background-color: #1a1a1a;
+    }
+
+    footer {
+      margin-top: 40px;
+      font-size: 14px;
+      color: #888;
+      transition: color 0.2s;
+      padding: 20px;
+      border-top: 1px solid #eee;
+    }
+    footer .creator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #0063B2, #0095FF);
+      color: white;
+      font-size: 13px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+    footer .creator:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    body.dark footer, body[data-theme="dark"] footer {
+      color: #707070;
+      border-top-color: #333;
+    }
+    #installSection {
+      margin-top: 40px;
+    }
+    .ios-guide {
+      background: #fffbe2;
+      border: 1px solid #ffe58f;
+      padding: 16px;
+      border-radius: 8px;
+      color: #b38f00;
+      margin: 0 auto;
+      width: 80%;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .kakao-warning {
+      background: #ff3b30;
+      color: white;
+      padding: 16px;
+      margin: 0;
+      border-radius: 0;
+      width: 100%;
+      box-sizing: border-box;
+      font-size: 16px;
+      transition: background 0.2s, color 0.2s;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1001;
+    }
+    #kakaoWarning {
+      display: none;
+      height: 53px;
+    }
+    /* 경고창이 표시될 때 본문 여백 조정 */
+    body.has-warning {
+      padding-top: 93px;
+    }
+    #browserSwitch {
+      margin: 0 auto 18px auto;
+      display: flex;
+      justify-content: center;
+      z-index: 1000;
+      position: relative;
+    }
+    .browser-btn {
+      background: #4CAF50 !important;
+      margin: 0 5px;
+      padding: 8px 16px !important;
+      font-size: 14px !important;
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    #recentBarcodes {
+      margin: 20px 0;
+      font-size: 15px;
+    }
+    #recentBarcodes button {
+      background: #f1f1f1;
+      color: #333;
+      border: 1px solid #bbb;
+      margin: 0 4px 4px 0;
+      padding: 5px 14px;
+      border-radius: 4px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    #recentBarcodes button:hover {
+      background: #e0e0e0;
+    }
+    #downloadBtn {
+      margin-top: 12px;
+      display: none;
+      background: #ff9800;
+      color: #fff;
+      font-size: 15px;
+      padding: 10px 20px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+    }
+    /* 다크모드/라이트모드 선택상자 */
+    #themeSelectorBox {
+      position: fixed;
+      left: 16px;
+      bottom: 16px;
+      z-index: 2000;
+      background: rgba(255,255,255,0.85);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 8px 12px;
+      font-size: 14px;
+      color: #444;
+      transition: background 0.2s, color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    @media (prefers-color-scheme: dark) {
+      #themeSelectorBox {
+        background: rgba(30,30,30,0.92);
+        color: #eee;
+      }
+    }
+    body.dark #themeSelectorBox, body[data-theme="dark"] #themeSelectorBox {
+      background: rgba(30,30,30,0.92);
+      color: #eee;
+    }
+    body.light #themeSelectorBox, body[data-theme="light"] #themeSelectorBox {
+      background: rgba(255,255,255,0.85);
+      color: #444;
+    }
+    #themeSelector {
+      font-size: 14px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid #bbb;
+      background: inherit;
+      color: inherit;
+    }
+    /* 설정 버튼 스타일 */
+    #settingsBtn {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      z-index: 2000;
+      background: rgba(255,255,255,0.85);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 8px 12px;
+      font-size: 14px;
+      color: #444;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    /* 설정 모달 스타일 */
+    #settingsModal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 3000;
+    }
+    .modal-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      width: 80%;
+      max-width: 400px;
+    }
+    body.dark .modal-content, body[data-theme="dark"] .modal-content {
+      background: #2d2d2d;
+      color: #e0e0e0;
+    }
+    .modal-content h2 {
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+    .settings-group {
+      margin-bottom: 20px;
+    }
+    .settings-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    .settings-group select, .settings-group input {
+      width: 100%;
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+      background: white;
+    }
+    body.dark .settings-group select, 
+    body.dark .settings-group input,
+    body[data-theme="dark"] .settings-group select,
+    body[data-theme="dark"] .settings-group input {
+      background: #1a1a1a;
+      border-color: #404040;
+      color: #e0e0e0;
+    }
+    .modal-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 20px;
+    }
+    .modal-buttons button {
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #closeSettingsBtn {
+      background: #f1f1f1;
+      color: #333;
+      border: 1px solid #ddd;
+    }
+    body.dark #closeSettingsBtn, body[data-theme="dark"] #closeSettingsBtn {
+      background: #404040;
+      color: #e0e0e0;
+      border-color: #555;
+    }
+
+    /* 다크모드에서는 더 밝은 색상 사용 */
+    body.dark #barcodeText, body[data-theme="dark"] #barcodeText {
+      color: #0095FF;
+    }
+
+    body.dark #recentBarcodes button:hover, body[data-theme="dark"] #recentBarcodes button:hover {
+      background: linear-gradient(135deg, #0063B2, #0095FF);
+    }
+
+    /* 즐겨찾기 및 최근 바코드 스타일 */
+    #barcodeHistory {
+      margin: 24px 0;
+      padding: 0 16px;
+    }
+
+    .history-section {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .history-title {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    body.dark .history-title, body[data-theme="dark"] .history-title {
+      color: #a0a0a0;
+    }
+
+    .barcode-button {
+      background: white;
+      color: #666;
+      border: 1px solid #ddd;
+      margin: 0 4px 8px 4px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .favorite-btn {
+      background: none;
+      border: none;
+      padding: 4px;
+      cursor: pointer;
+      color: #666;
+      margin-left: 4px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .favorite-btn.active {
+      color: #FFD700;
+    }
+
+    body.dark .favorite-btn, body[data-theme="dark"] .favorite-btn {
+      color: #888;
+    }
+
+    body.dark .favorite-btn.active, body[data-theme="dark"] .favorite-btn.active {
+      color: #FFD700;
+    }
+
+    /* 공유 버튼 스타일 */
+    #shareBtn {
+      margin-left: 8px;
+      padding: 12px 20px;
+      background: linear-gradient(135deg, #0063B2, #0095FF);
+    }
+
+    /* 공유 모달 스타일 */
+    #shareModal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 3000;
+    }
+
+    .share-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .share-option {
+      padding: 16px;
+      border-radius: 12px;
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+
+    .share-option:hover {
+      background: #e5e5e5;
+    }
+
+    body.dark .share-option, body[data-theme="dark"] .share-option {
+      background: #2d2d2d;
+      border-color: #404040;
+      color: #e0e0e0;
+    }
+
+    body.dark .share-option:hover, body[data-theme="dark"] .share-option:hover {
+      background: #404040;
+    }
+
+    .barcode-button:hover {
+      background: linear-gradient(135deg, #0063B2, #0095FF);
+      color: white;
+      border-color: transparent;
+    }
+
+    body.dark .barcode-button, body[data-theme="dark"] .barcode-button {
+      background: #2d2d2d;
+      color: #e0e0e0;
+      border-color: #404040;
+    }
+
+    body.dark .barcode-button:hover, body[data-theme="dark"] .barcode-button:hover {
+      background: linear-gradient(135deg, #0063B2, #0095FF);
+      color: white;
+      border-color: transparent;
+    }
+
+    /* 가이드 모달 스타일 */
+    #guideModal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 3000;
+    }
+
+    .guide-content {
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: left;
+      font-size: 14px;
+    }
+
+    .guide-content h2 {
+      margin-top: 0;
+      color: #0063B2;
+      font-size: 1.3em;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .guide-section {
+      margin-bottom: 16px;
+    }
+
+    .guide-section h3 {
+      color: #0063B2;
+      font-size: 1em;
+      margin-bottom: 6px;
+    }
+
+    .guide-section ul {
+      margin: 0;
+      padding-left: 20px;
+      list-style-type: none;
+    }
+
+    .guide-section li {
+      margin-bottom: 6px;
+      position: relative;
+      line-height: 1.4;
+      font-size: 0.95em;
+    }
+
+    .guide-section li::before {
+      content: "•";
+      color: #0063B2;
+      position: absolute;
+      left: -15px;
+      font-size: 1.1em;
+    }
+
+    .modal-buttons {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .modal-buttons button {
+      font-size: 14px;
+      padding: 8px 20px;
+    }
+
+    body.dark .guide-content, body[data-theme="dark"] .guide-content {
+      background: #2d2d2d;
+      color: #e0e0e0;
+    }
+
+    #helpBtn {
+      position: fixed;
+      right: 16px;
+      bottom: 70px;
+      z-index: 2000;
+      background: rgba(255,255,255,0.85);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 8px 12px;
+      font-size: 14px;
+      color: #444;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    body.dark #helpBtn, body[data-theme="dark"] #helpBtn {
+      background: rgba(30,30,30,0.92);
+      color: #e0e0e0;
+    }
+  </style>
+</head>
+<body>
+  <!-- 경고 메시지(페이지 최상단) -->
+  <div id="kakaoWarning"></div>
+  <!-- 브라우저 전환 버튼(경고 아래, 본문 위) -->
+  <div id="browserSwitch"></div>
+  <!-- 다크/라이트/시스템 선택상자 -->
+  <div id="themeSelectorBox">
+    <label for="themeSelector" style="font-weight:bold;">테마</label>
+    <select id="themeSelector">
+      <option value="auto">시스템 자동</option>
+      <option value="light">라이트모드</option>
+      <option value="dark">다크모드</option>
+    </select>
+  </div>
+
+  <!-- 설정 버튼 -->
+  <button id="settingsBtn">⚙️ 설정</button>
+
+  <!-- 설정 모달 -->
+  <div id="settingsModal">
+    <div class="modal-content">
+      <h2>설정</h2>
+      <div class="settings-group">
+        <label for="defaultEmployeeId">기본 직번</label>
+        <input type="text" id="defaultEmployeeId" placeholder="직번을 입력하세요" maxlength="7" inputmode="numeric" />
+      </div>
+      <div class="settings-group">
+        <label for="barcodeSize">바코드 크기</label>
+        <select id="barcodeSize">
+          <option value="2" selected>작게</option>
+          <option value="3">보통</option>
+          <option value="4">크게</option>
+        </select>
+      </div>
+      <div class="modal-buttons">
+        <button id="closeSettingsBtn">닫기</button>
+        <button onclick="saveSettings()">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 도움말 버튼 추가 -->
+  <button id="helpBtn">❓ 도움말</button>
+
+  <!-- 가이드 모달 -->
+  <div id="guideModal">
+    <div class="guide-content">
+      <h2>💡 바코드 생성기 사용 가이드</h2>
+      
+      <div class="guide-section">
+        <h3>📱 기본 사용법</h3>
+        <ul>
+          <li>숫자만 입력 가능합니다 (최대 7자리)</li>
+          <li>바코드 생성 후 크기 조절이 가능합니다</li>
+          <li>생성된 바코드는 이미지로 저장하거나 공유할 수 있습니다</li>
+          <li>자주 사용하는 바코드는 즐겨찾기(★)에 등록하세요</li>
+        </ul>
+      </div>
+
+      <div class="guide-section">
+        <h3>⚡ 편리한 기능</h3>
+        <ul>
+          <li>홈 화면에 추가하여 앱처럼 사용할 수 있습니다</li>
+          <li>다크모드를 지원합니다 (시스템 설정 연동 가능)</li>
+          <li>최근 생성한 바코드 5개가 자동으로 저장됩니다</li>
+          <li>즐겨찾기한 바코드는 영구적으로 저장됩니다</li>
+        </ul>
+      </div>
+
+      <div class="guide-section">
+        <h3>⚠️ 주의사항</h3>
+        <ul>
+          <li>카카오톡 인앱 브라우저에서는 일부 기능이 제한됩니다</li>
+          <li>원활한 사용을 위해 기본 브라우저 사용을 권장합니다</li>
+          <li>브라우저 데이터 삭제 시 저장된 바코드가 삭제될 수 있습니다</li>
+          <li>Code-128 형식으로만 바코드가 생성됩니다</li>
+        </ul>
+      </div>
+
+      <div class="modal-buttons">
+        <button onclick="closeGuideModal()">확인</button>
+      </div>
+    </div>
+  </div>
+
+  <h1>💉 바코드 생성기 🩺</h1>
+  <p>텍스트를 입력하고 바코드를 생성하세요.</p>
+
+  <form onsubmit="generateBarcode(); return false;" id="barcodeForm" style="display:flex; justify-content:center; align-items:center; gap:8px; margin-bottom:0;">
+    <input type="text" id="barcodeInput" placeholder="직번을 입력하세요(ex. 0123456)" required maxlength="7" inputmode="numeric" style="width:220px; margin-bottom:0;" />
+    <button type="submit" style="margin-bottom:0;">바코드 생성</button>
+  </form>
+
+  <div id="result">
+    <div id="barcodeGuide">💫이 사이트를 홈 화면에 추가하면 웹앱형태로 이용 가능합니다!💫</div>
+    <img id="barcodeImage" src="" alt="바코드 이미지" style="display: none;" />
+    <div id="barcodeText"></div>
+    <div class="button-group" style="margin-top: 16px;">
+      <button id="downloadBtn" style="display: none;">이미지 다운로드</button>
+      <button id="shareBtn" style="display: none;">공유하기</button>
+    </div>
+  </div>
+
+  <div id="barcodeHistory">
+    <div id="favorites" class="history-section">
+      <div class="history-title">⭐ 즐겨찾기</div>
+    </div>
+    <div id="recents" class="history-section">
+      <div class="history-title">🕒 최근 바코드</div>
+    </div>
+  </div>
+
+  <!-- 공유 모달 -->
+  <div id="shareModal">
+    <div class="modal-content">
+      <h2>공유하기</h2>
+      <div class="share-options">
+        <div class="share-option" onclick="shareImage()">
+          <div>📱 이미지 공유</div>
+        </div>
+        <div class="share-option" onclick="copyImageUrl()">
+          <div>🔗 이미지 주소 복사</div>
+        </div>
+      </div>
+      <div class="modal-buttons">
+        <button id="closeShareBtn">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="installSection" style="display: none;"></div>
+
+  <footer>
+    <a href="https://github.com/yuangunn" target="_blank" class="creator">
+      <span>✨ Created by yuangunn</span>
+    </a>
+  </footer>
+
+  <script>
+    // 브라우저/OS 감지 함수
+    function isAndroid() { return /Android/i.test(navigator.userAgent); }
+    function isiOS() { return /iPhone|iPad|iPod/i.test(navigator.userAgent); }
+    function isChrome() { return /Chrome/i.test(navigator.userAgent) && !/SamsungBrowser/i.test(navigator.userAgent); }
+    function isSafari() { return /Safari/i.test(navigator.userAgent) && !/CriOS|FxiOS/i.test(navigator.userAgent); }
+    function isKakaoTalkBrowser() { return /KAKAOTALK/i.test(navigator.userAgent); }
+    function isInstagramBrowser() { return /Instagram/i.test(navigator.userAgent); }
+    function isInAppBrowser() { return isKakaoTalkBrowser() || isInstagramBrowser(); }
+
+    // 브라우저 전환 버튼 생성 (중복 방지)
+    function createBrowserSwitch() {
+      const container = document.getElementById('browserSwitch');
+      let html = '';
+
+      if (isInAppBrowser()) {
+        if (isAndroid()) {
+          html += `<button class="browser-btn" onclick="openInChrome()">크롬에서 열기</button>`;
+        } else if (isiOS()) {
+          html += `<button class="browser-btn" onclick="openInSafari()">사파리에서 열기(주소 복사)</button>`;
+        }
+      } else {
+        if (isAndroid() && !isChrome()) {
+          html += `<button class="browser-btn" onclick="openInChrome()">크롬에서 열기</button>`;
+        } else if (isiOS() && !isSafari()) {
+          html += `<button class="browser-btn" onclick="openInSafari()">사파리에서 열기(주소 복사)</button>`;
+        }
+      }
+      container.innerHTML = html;
+    }
+
+    // 경고 메시지 생성 (중복 방지)
+    function showBrowserWarning() {
+      const warningDiv = document.getElementById('kakaoWarning');
+      let message = '';
+
+      if (isInAppBrowser()) {
+        message = `⚠️ 인앱 브라우저에서는 기능이 제한됩니다.<br><b>기본 브라우저</b>를 사용해주세요!`;
+      } else if (isAndroid() && !isChrome()) {
+        message = `⚠️ 현재 브라우저에서는 일부 기능이 제한됩니다.<br><b>크롬</b>에서 열어주세요!`;
+      } else if (isiOS() && !isSafari()) {
+        message = `⚠️ 현재 브라우저에서는 일부 기능이 제한됩니다.<br><b>사파리</b>에서 열어주세요!`;
+      }
+
+      if (message) {
+        warningDiv.style.display = 'block';
+        warningDiv.innerHTML = `<div class="kakao-warning">${message}</div>`;
+        document.body.classList.add('has-warning');
+      } else {
+        warningDiv.style.display = 'none';
+        document.body.classList.remove('has-warning');
+      }
+    }
+
+    // 크롬에서 열기 (Android)
+    function openInChrome() {
+      const currentUrl = window.location.href;
+      const urlWithoutProtocol = currentUrl.replace(/^https?:\/\//, '');
+      const intentUrl = `intent://${urlWithoutProtocol}#Intent;scheme=https;package=com.android.chrome;end`;
+      window.location.href = intentUrl;
+    }
+
+    // 사파리에서 열기 (iOS, 주소 자동 복사)
+    function openInSafari() {
+      const url = location.href;
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(url).then(() => {
+          alert('주소가 복사되었습니다!\n사파리에서 붙여넣기 해주세요.');
+        }).catch(() => {
+          alert('주소 복사에 실패했습니다.\n아래 주소를 직접 복사해 주세요:\n' + url);
+        });
+      } else {
+        const temp = document.createElement('input');
+        temp.value = url;
+        document.body.appendChild(temp);
+        temp.select();
+        try {
+          document.execCommand('copy');
+          alert('주소가 복사되었습니다!\n사파리에서 붙여넣기 해주세요.');
+        } catch {
+          alert('주소 복사에 실패했습니다.\n아래 주소를 직접 복사해 주세요:\n' + url);
+        }
+        document.body.removeChild(temp);
+      }
+    }
+
+    // 웹앱(PWA) 실행 여부 확인
+    function isStandalone() {
+      return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
+        || window.navigator.standalone === true;
+    }
+    function isIosSafariOnly() {
+      const ua = window.navigator.userAgent;
+      const isIOS = /iP(ad|hone|od)/.test(ua) && !window.MSStream;
+      const isSafari = /Safari/.test(ua) && !/CriOS|FxiOS/.test(ua);
+      return isIOS && isSafari && !isStandalone();
+    }
+
+    // iOS standalone 모드 감지 및 클래스 추가
+    function addStandaloneClass() {
+      if (window.navigator.standalone === true) {
+        document.body.classList.add('standalone');
+      }
+    }
+
+    // 최근 바코드 저장/불러오기
+    function saveRecentBarcode(input) {
+      let recents = JSON.parse(localStorage.getItem('recent-barcodes') || '[]');
+      recents = recents.filter(x => x !== input); // 중복 제거
+      recents.unshift(input);
+      if (recents.length > 5) recents = recents.slice(0,5);
+      localStorage.setItem('recent-barcodes', JSON.stringify(recents));
+      renderBarcodeHistory();
+    }
+
+    function setBarcodeInput(val) {
+      document.getElementById('barcodeInput').value = val;
+      generateBarcode();
+    }
+
+    // 바코드 생성 및 유효성 검사 + 다운로드 버튼 + 입력값 표시
+    function generateBarcode() {
+      const input = document.getElementById("barcodeInput").value.trim();
+      // 숫자만 허용하도록 수정
+      if (!/^\d+$/.test(input)) {
+        alert("숫자만 입력 가능합니다.");
+        return;
+      }
+
+             const barcodeSize = localStorage.getItem('barcode-size') || '2';
+      const encoded = encodeURIComponent(input);
+      const url = `https://bwipjs-api.metafloor.com/?bcid=code128&text=${encoded}&scale=${barcodeSize}&backgroundcolor=ffffff&paddingwidth=20&paddingheight=40`;
+
+      const img = document.getElementById("barcodeImage");
+      img.src = url;
+      img.style.display = "block";
+      document.getElementById("barcodeGuide").style.display = "none";
+
+      // 다운로드와 공유 버튼 표시
+      const downloadBtn = document.getElementById("downloadBtn");
+      const shareBtn = document.getElementById("shareBtn");
+      downloadBtn.style.display = "inline-block";
+      shareBtn.style.display = "inline-block";
+
+      // 다운로드 버튼 이벤트 핸들러
+      downloadBtn.onclick = function() {
+        const a = document.createElement('a');
+        a.href = img.src;
+        a.download = `barcode_${input}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      };
+
+      // 바코드 텍스트 표시
+      document.getElementById("barcodeText").textContent = input;
+
+      // 최근 바코드 저장
+      saveRecentBarcode(input);
+    }
+
+    // 설정 관련 함수들
+    function initSettings() {
+      const settingsBtn = document.getElementById('settingsBtn');
+      const settingsModal = document.getElementById('settingsModal');
+      const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+      const barcodeSizeSelect = document.getElementById('barcodeSize');
+      const defaultEmployeeIdInput = document.getElementById('defaultEmployeeId');
+
+      // 저장된 설정 불러오기
+      const savedSize = localStorage.getItem('barcode-size') || '2';
+      const savedEmployeeId = localStorage.getItem('default-employee-id') || '';
+      
+      barcodeSizeSelect.value = savedSize;
+      defaultEmployeeIdInput.value = savedEmployeeId;
+
+      // 직번 입력 필드 숫자만 입력 가능하도록 설정
+      defaultEmployeeIdInput.addEventListener('input', function(e) {
+        this.value = this.value.replace(/[^0-9]/g, '');
+      });
+
+      settingsBtn.onclick = function() {
+        settingsModal.style.display = 'block';
+      };
+
+      closeSettingsBtn.onclick = function() {
+        settingsModal.style.display = 'none';
+      };
+
+      settingsModal.onclick = function(e) {
+        if (e.target === settingsModal) {
+          settingsModal.style.display = 'none';
+        }
+      };
+    }
+
+    function saveSettings() {
+      const barcodeSizeSelect = document.getElementById('barcodeSize');
+      const defaultEmployeeIdInput = document.getElementById('defaultEmployeeId');
+      
+      // 직번 유효성 검사
+      const employeeId = defaultEmployeeIdInput.value.trim();
+      if (employeeId && !/^\d+$/.test(employeeId)) {
+        alert('직번은 숫자만 입력 가능합니다.');
+        return;
+      }
+
+      // 설정 저장
+      localStorage.setItem('barcode-size', barcodeSizeSelect.value);
+      localStorage.setItem('default-employee-id', employeeId);
+      
+      // 현재 표시된 바코드가 있다면 새로운 크기로 다시 생성
+      const currentInput = document.getElementById('barcodeInput').value.trim();
+      if (currentInput && document.getElementById('barcodeImage').style.display !== 'none') {
+        generateBarcode();
+      }
+
+      alert('설정이 저장되었습니다.');
+      document.getElementById('settingsModal').style.display = 'none';
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      showBrowserWarning();
+      createBrowserSwitch();
+      initSettings();
+      initShareFeatures();
+      addStandaloneClass();  // standalone 클래스 추가
+
+      if (isStandalone()) {
+        document.getElementById('barcodeGuide').style.display = 'none';
+      }
+
+      const installSection = document.getElementById('installSection');
+      if (isIosSafariOnly()) {
+        installSection.style.display = 'block';
+        installSection.innerHTML = `
+          <div class="ios-guide">
+            📱 <strong>iPhone 사용자 안내</strong><br>
+            1. Safari 하단의 <span style="font-size:1.2em;">🔼 공유 버튼</span> 클릭<br>
+            2. <strong>'홈 화면에 추가'</strong> 선택
+          </div>
+        `;
+      }
+
+      // 테마 선택 초기화
+      initThemeSelector();
+
+      // 최근 바코드 표시
+      renderBarcodeHistory();
+
+      // 다운로드 버튼 숨김(초기)
+      document.getElementById("downloadBtn").style.display = "none";
+
+      // 저장된 기본 직번이 있으면 입력 필드에 자동 입력
+      const savedEmployeeId = localStorage.getItem('default-employee-id');
+      if (savedEmployeeId) {
+        document.getElementById('barcodeInput').value = savedEmployeeId;
+        generateBarcode();
+      }
+    });
+
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('installSection').style.display = 'block';
+      document.getElementById('installSection').innerHTML = `
+        <button id="installBtn">📲 홈 화면에 추가</button>
+      `;
+    });
+
+    document.addEventListener('click', (e) => {
+      if (e.target.id === 'installBtn') {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') console.log('설치 완료');
+          deferredPrompt = null;
+        });
+      }
+    });
+
+    // 다크/라이트/시스템 테마 선택 로직
+    function setTheme(mode) {
+      // body 클래스 초기화
+      document.body.classList.remove('light', 'dark');
+      document.body.removeAttribute('data-theme');
+
+      if (mode === 'auto') {
+        // 시스템 설정 확인
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          document.body.classList.add('dark');
+          document.body.setAttribute('data-theme', 'dark');
+        } else {
+          document.body.classList.add('light');
+          document.body.setAttribute('data-theme', 'light');
+        }
+      } else if (mode === 'dark') {
+        document.body.classList.add('dark');
+        document.body.setAttribute('data-theme', 'dark');
+      } else if (mode === 'light') {
+        document.body.classList.add('light');
+        document.body.setAttribute('data-theme', 'light');
+      }
+
+      // 메타 태그 업데이트
+      updateMetaThemeColor();
+    }
+
+    // 메타 테마 색상 업데이트
+    function updateMetaThemeColor() {
+      const isDark = document.body.classList.contains('dark');
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+      if (metaThemeColor) {
+        metaThemeColor.content = isDark ? '#1a1a1a' : '#f9f9f9';
+      }
+    }
+
+    function initThemeSelector() {
+      const selector = document.getElementById('themeSelector');
+      
+      // 저장된 테마 불러오기
+      const savedTheme = localStorage.getItem('theme-mode') || 'auto';
+      selector.value = savedTheme;
+      
+      // 초기 테마 설정
+      setTheme(savedTheme);
+
+      // 테마 선택 변경 이벤트
+      selector.addEventListener('change', function() {
+        const mode = this.value;
+        setTheme(mode);
+        localStorage.setItem('theme-mode', mode);
+      });
+
+      // 시스템 테마 변경 감지
+      const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      darkModeMediaQuery.addListener((e) => {
+        const currentTheme = localStorage.getItem('theme-mode') || 'auto';
+        if (currentTheme === 'auto') {
+          setTheme('auto');
+        }
+      });
+    }
+
+    // 즐겨찾기 관련 함수들
+    function toggleFavorite(barcode) {
+      let favorites = JSON.parse(localStorage.getItem('favorite-barcodes') || '[]');
+      const index = favorites.indexOf(barcode);
+      
+      if (index === -1) {
+        favorites.push(barcode);
+      } else {
+        favorites.splice(index, 1);
+      }
+      
+      localStorage.setItem('favorite-barcodes', JSON.stringify(favorites));
+      renderBarcodeHistory();
+    }
+
+    function isFavorite(barcode) {
+      const favorites = JSON.parse(localStorage.getItem('favorite-barcodes') || '[]');
+      return favorites.includes(barcode);
+    }
+
+    // 바코드 히스토리 렌더링
+    function renderBarcodeHistory() {
+      const favorites = JSON.parse(localStorage.getItem('favorite-barcodes') || '[]');
+      const recents = JSON.parse(localStorage.getItem('recent-barcodes') || '[]');
+      
+      // 즐겨찾기 렌더링
+      const favoritesContainer = document.getElementById('favorites');
+      favoritesContainer.innerHTML = '<div class="history-title">⭐ 즐겨찾기</div>';
+      
+      if (favorites.length > 0) {
+        favorites.forEach(barcode => {
+          const btn = document.createElement('button');
+          btn.className = 'barcode-button';
+          btn.innerHTML = `${barcode} <button class="favorite-btn active" onclick="event.stopPropagation(); toggleFavorite('${barcode}')">★</button>`;
+          btn.onclick = () => setBarcodeInput(barcode);
+          favoritesContainer.appendChild(btn);
+        });
+      }
+
+      // 최근 바코드 렌더링
+      const recentsContainer = document.getElementById('recents');
+      recentsContainer.innerHTML = '<div class="history-title">🕒 최근 바코드</div>';
+      
+      if (recents.length > 0) {
+        recents.forEach(barcode => {
+          if (!favorites.includes(barcode)) { // 즐겨찾기에 없는 항목만 표시
+            const btn = document.createElement('button');
+            btn.className = 'barcode-button';
+            btn.innerHTML = `${barcode} <button class="favorite-btn" onclick="event.stopPropagation(); toggleFavorite('${barcode}')">☆</button>`;
+            btn.onclick = () => setBarcodeInput(barcode);
+            recentsContainer.appendChild(btn);
+          }
+        });
+      }
+    }
+
+    // 공유 관련 함수들
+    function initShareFeatures() {
+      const shareBtn = document.getElementById('shareBtn');
+      const shareModal = document.getElementById('shareModal');
+      const closeShareBtn = document.getElementById('closeShareBtn');
+
+      shareBtn.onclick = () => {
+        shareModal.style.display = 'block';
+      };
+
+      closeShareBtn.onclick = () => {
+        shareModal.style.display = 'none';
+      };
+
+      shareModal.onclick = (e) => {
+        if (e.target === shareModal) {
+          shareModal.style.display = 'none';
+        }
+      };
+    }
+
+    async function shareImage() {
+      const img = document.getElementById('barcodeImage');
+      const barcode = document.getElementById('barcodeInput').value;
+
+      try {
+        const response = await fetch(img.src);
+        const blob = await response.blob();
+        const file = new File([blob], `barcode_${barcode}.png`, { type: 'image/png' });
+
+        if (navigator.share) {
+          await navigator.share({
+            files: [file],
+            title: '바코드 공유',
+            text: `바코드: ${barcode}`
+          });
+        } else {
+          // 공유 API를 지원하지 않는 경우 다운로드로 대체
+          const a = document.createElement('a');
+          a.href = img.src;
+          a.download = `barcode_${barcode}.png`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        }
+      } catch (error) {
+        alert('이미지 공유에 실패했습니다.');
+      }
+
+      document.getElementById('shareModal').style.display = 'none';
+    }
+
+    function copyImageUrl() {
+      const img = document.getElementById('barcodeImage');
+      
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(img.src).then(() => {
+          alert('이미지 주소가 복사되었습니다!');
+        }).catch(() => {
+          alert('이미지 주소 복사에 실패했습니다.');
+        });
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = img.src;
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+          document.execCommand('copy');
+          alert('이미지 주소가 복사되었습니다!');
+        } catch (err) {
+          alert('이미지 주소 복사에 실패했습니다.');
+        }
+        document.body.removeChild(textarea);
+      }
+
+      document.getElementById('shareModal').style.display = 'none';
+    }
+
+    // 가이드 모달 관련 함수
+    function showGuideModal() {
+      document.getElementById('guideModal').style.display = 'block';
+    }
+
+    function closeGuideModal() {
+      document.getElementById('guideModal').style.display = 'none';
+    }
+
+    // 도움말 버튼 이벤트 리스너
+    document.getElementById('helpBtn').addEventListener('click', showGuideModal);
+
+    // 모달 외부 클릭 시 닫기
+    document.getElementById('guideModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeGuideModal();
+      }
+    });
+
+    // 첫 방문 시 가이드 모달 자동 표시
+    if (!localStorage.getItem('guide-shown')) {
+      window.addEventListener('DOMContentLoaded', function() {
+        setTimeout(showGuideModal, 1000);
+        localStorage.setItem('guide-shown', 'true');
+      });
+    }
+  </script>
+</body>
+</html>
