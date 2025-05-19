@@ -13,14 +13,46 @@
   <link rel="manifest" href="manifest.json" />
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
   <style>
+    :root {
+      --bg-color: #f9f9f9;
+      --text-color: #333;
+      --modal-bg: #ffffff;
+      --modal-text: #333;
+      --input-bg: #ffffff;
+      --input-border: #ddd;
+      --input-text: #333;
+      --button-bg: rgba(255,255,255,0.9);
+      --button-text: #444;
+      --fixed-barcode-bg: #ffffff;
+      --theme-selector-bg: rgba(255,255,255,0.85);
+      --theme-selector-text: #444;
+      --box-shadow: rgba(0,0,0,0.1);
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #1a1a1a;
+      --text-color: #e0e0e0;
+      --modal-bg: #2d2d2d;
+      --modal-text: #e0e0e0;
+      --input-bg: #1a1a1a;
+      --input-border: #404040;
+      --input-text: #e0e0e0;
+      --button-bg: rgba(45,45,45,0.9);
+      --button-text: #e0e0e0;
+      --fixed-barcode-bg: #2d2d2d;
+      --theme-selector-bg: rgba(45,45,45,0.9);
+      --theme-selector-text: #e0e0e0;
+      --box-shadow: rgba(0,0,0,0.3);
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       text-align: center;
-      padding: 40px 20px;
-      background-color: #f9f9f9;
-      color: #333;
+      padding: 100px 20px 40px;
+      background-color: var(--bg-color);
+      color: var(--text-color);
       margin: 0;
-      transition: background 0.2s, color 0.2s;
+      transition: all 0.3s ease;
       line-height: 1.6;
     }
 
@@ -36,8 +68,8 @@
 
     p {
       color: #666;
-      margin-bottom: 30px;
-      font-size: 16px;
+      margin-bottom: 12px;
+      font-size: 12px;
     }
 
     input[type="text"] {
@@ -137,143 +169,172 @@
       background: linear-gradient(135deg, #0063B2, #0095FF);
     }
 
-    /* 다크모드 스타일 개선 */
+    /* 다크모드 스타일 */
     body.dark, body[data-theme="dark"] {
       background-color: #1a1a1a;
       color: #e0e0e0;
     }
 
-    body.dark input[type="text"], body[data-theme="dark"] input[type="text"] {
+    body.dark #fixedBarcode,
+    body[data-theme="dark"] #fixedBarcode {
       background: #2d2d2d;
-      border-color: #404040;
-      color: #e0e0e0;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
     }
 
-    body.dark input[type="text"]:focus, body[data-theme="dark"] input[type="text"]:focus {
-      border-color: #0063B2;
-      box-shadow: 0 2px 12px rgba(0,99,178,0.2);
+    body.dark #employeeIdText,
+    body[data-theme="dark"] #employeeIdText {
+      color: #0095FF;
     }
 
-    body.dark #barcodeGuide, body[data-theme="dark"] #barcodeGuide {
-      color: #a0a0a0;
-      background: linear-gradient(135deg, rgba(0,32,91,0.15), rgba(0,99,178,0.15));
-    }
-
-    body.dark #recentBarcodes button, body[data-theme="dark"] #recentBarcodes button {
+    body.dark .employee-modal-content,
+    body[data-theme="dark"] .employee-modal-content {
       background: #2d2d2d;
       color: #e0e0e0;
+    }
+
+    body.dark .employee-modal-content input,
+    body[data-theme="dark"] .employee-modal-content input {
+      background: #1a1a1a;
       border-color: #404040;
+      color: #e0e0e0;
     }
 
-    body.dark #recentBarcodes button:hover, body[data-theme="dark"] #recentBarcodes button:hover {
-      background: linear-gradient(135deg, #0063B2, #0095FF);
-      color: white;
-      border-color: transparent;
+    body.dark .bottom-fixed-button,
+    body[data-theme="dark"] .bottom-fixed-button {
+      background: rgba(45,45,45,0.9);
+      color: #e0e0e0;
     }
 
-    body.dark img, body[data-theme="dark"] img {
-      background-color: #2d2d2d;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    body.dark #themeSelectorBox,
+    body[data-theme="dark"] #themeSelectorBox {
+      background: rgba(45,45,45,0.9);
+      color: #e0e0e0;
     }
 
-    /* 설정 모달 스타일 개선 */
-    .modal-content {
+    body.dark #themeSelector,
+    body[data-theme="dark"] #themeSelector {
+      background: #1a1a1a;
+      border-color: #404040;
+      color: #e0e0e0;
+    }
+
+    /* 설정 모달 스타일 */
+    #settingsModal .modal-content {
+      background: var(--modal-bg);
+      color: var(--text-color);
+      padding: 24px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: white;
-      padding: 32px;
-      border-radius: 20px;
-      width: 85%;
-      max-width: 400px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      box-shadow: 0 10px 25px var(--box-shadow);
     }
 
-    .modal-content h2 {
+    #settingsModal .modal-content h2 {
       margin: 0 0 24px 0;
       font-size: 24px;
-      background: linear-gradient(135deg, #0063B2, #0095FF);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: var(--text-color);
+      text-align: center;
     }
 
     .settings-group {
       margin-bottom: 24px;
     }
 
-    .settings-group label {
-      display: block;
-      margin-bottom: 12px;
+    .settings-group h3 {
+      font-size: 1.1em;
+      margin: 0 0 12px 0;
+      color: var(--text-color);
       font-weight: 600;
-      color: #444;
     }
 
-    .settings-group select {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid #ddd;
-      background: white;
-      font-size: 15px;
-      color: #444;
-      transition: all 0.3s ease;
+    .setting-item {
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 0;
     }
 
-    .settings-group select:focus {
-      outline: none;
-      border-color: #6e8efb;
-      box-shadow: 0 2px 12px rgba(110,142,251,0.15);
+    .setting-item label {
+      flex: 1;
+      font-size: 0.95em;
+      color: var(--text-color);
+      margin: 0;
+      text-align: left;
+    }
+
+    .setting-item select {
+      width: 120px;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid var(--input-border);
+      background: var(--input-bg);
+      color: var(--input-text);
+      font-size: 0.9em;
+      margin: 0;
     }
 
     .modal-buttons {
       display: flex;
       justify-content: flex-end;
-      gap: 12px;
+      gap: 8px;
       margin-top: 24px;
     }
 
     .modal-buttons button {
-      padding: 12px 24px;
-      border-radius: 10px;
-      font-size: 15px;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.9em;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin: 0;
     }
 
-    #closeSettingsBtn {
-      background: #f1f1f1;
-      color: #666;
-      border: 1px solid #ddd;
+    .primary-button {
+      background: var(--button-bg);
+      color: var(--button-text);
+      border: 1px solid var(--input-border);
     }
 
-    #closeSettingsBtn:hover {
-      background: #e5e5e5;
+    .primary-button:hover {
+      background: var(--theme-selector-bg);
     }
 
-    body.dark .modal-content, body[data-theme="dark"] .modal-content {
-      background: #2d2d2d;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    .secondary-button {
+      background: var(--theme-selector-bg);
+      color: var(--text-color);
+      border: 1px solid var(--input-border);
     }
 
-    body.dark .settings-group label, body[data-theme="dark"] .settings-group label {
-      color: #e0e0e0;
+    .secondary-button:hover {
+      background: var(--button-bg);
     }
 
-    body.dark .settings-group select, body[data-theme="dark"] .settings-group select {
-      background: #1a1a1a;
-      border-color: #404040;
-      color: #e0e0e0;
+    .cancel-button {
+      background: transparent;
+      color: var(--text-color);
+      border: 1px solid var(--input-border);
     }
 
-    body.dark #closeSettingsBtn, body[data-theme="dark"] #closeSettingsBtn {
-      background: #404040;
-      color: #e0e0e0;
-      border-color: #555;
+    .cancel-button:hover {
+      background: var(--theme-selector-bg);
     }
 
-    body.dark #closeSettingsBtn:hover, body[data-theme="dark"] #closeSettingsBtn:hover {
-      background: #505050;
+    /* 모달 배경 스타일 */
+    #settingsModal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 3000;
     }
 
     /* 폼 컨테이너 스타일 */
@@ -432,13 +493,13 @@
       left: 16px;
       bottom: 16px;
       z-index: 2000;
-      background: rgba(255,255,255,0.85);
+      background: var(--theme-selector-bg);
       border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      box-shadow: 0 2px 8px var(--box-shadow);
       padding: 8px 12px;
       font-size: 14px;
-      color: #444;
-      transition: background 0.2s, color 0.2s;
+      color: var(--theme-selector-text);
+      transition: all 0.3s ease;
       display: flex;
       align-items: center;
       gap: 6px;
@@ -461,9 +522,10 @@
       font-size: 14px;
       padding: 2px 8px;
       border-radius: 4px;
-      border: 1px solid #bbb;
-      background: inherit;
-      color: inherit;
+      border: 1px solid var(--input-border);
+      background: var(--input-bg);
+      color: var(--input-text);
+      transition: all 0.3s ease;
     }
     /* 설정 버튼 스타일 */
     #settingsBtn {
@@ -471,91 +533,16 @@
       right: 16px;
       bottom: 16px;
       z-index: 2000;
-      background: rgba(255,255,255,0.85);
+      background: var(--button-bg);
       border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      box-shadow: 0 2px 8px var(--box-shadow);
       padding: 8px 12px;
       font-size: 14px;
-      color: #444;
+      color: var(--button-text);
       border: none;
       cursor: pointer;
       transition: all 0.2s;
     }
-    /* 설정 모달 스타일 */
-    #settingsModal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      z-index: 3000;
-    }
-    .modal-content {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: white;
-      padding: 24px;
-      border-radius: 12px;
-      width: 80%;
-      max-width: 400px;
-    }
-    body.dark .modal-content, body[data-theme="dark"] .modal-content {
-      background: #2d2d2d;
-      color: #e0e0e0;
-    }
-    .modal-content h2 {
-      margin-top: 0;
-      margin-bottom: 20px;
-    }
-    .settings-group {
-      margin-bottom: 20px;
-    }
-    .settings-group label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: bold;
-    }
-    .settings-group select, .settings-group input {
-      width: 100%;
-      padding: 8px;
-      border-radius: 4px;
-      border: 1px solid #ddd;
-      background: white;
-    }
-    body.dark .settings-group select, 
-    body.dark .settings-group input,
-    body[data-theme="dark"] .settings-group select,
-    body[data-theme="dark"] .settings-group input {
-      background: #1a1a1a;
-      border-color: #404040;
-      color: #e0e0e0;
-    }
-    .modal-buttons {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      margin-top: 20px;
-    }
-    .modal-buttons button {
-      padding: 8px 16px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    #closeSettingsBtn {
-      background: #f1f1f1;
-      color: #333;
-      border: 1px solid #ddd;
-    }
-    body.dark #closeSettingsBtn, body[data-theme="dark"] #closeSettingsBtn {
-      background: #404040;
-      color: #e0e0e0;
-      border-color: #555;
-    }
-
     /* 다크모드에서는 더 밝은 색상 사용 */
     body.dark #barcodeText, body[data-theme="dark"] #barcodeText {
       color: #0095FF;
@@ -565,133 +552,20 @@
       background: linear-gradient(135deg, #0063B2, #0095FF);
     }
 
-    /* 즐겨찾기 및 최근 바코드 스타일 */
-    #barcodeHistory {
-      margin: 24px 0;
-      padding: 0 16px;
-    }
-
-    .history-section {
-      margin-bottom: 20px;
-      text-align: left;
-    }
-
-    .history-title {
-      font-size: 14px;
-      color: #666;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    body.dark .history-title, body[data-theme="dark"] .history-title {
-      color: #a0a0a0;
-    }
-
-    .barcode-button {
-      background: white;
-      color: #666;
-      border: 1px solid #ddd;
-      margin: 0 4px 8px 4px;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 14px;
-      transition: all 0.3s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .favorite-btn {
-      background: none;
-      border: none;
-      padding: 4px;
-      cursor: pointer;
-      color: #666;
-      margin-left: 4px;
-      font-size: 16px;
-      transition: all 0.3s ease;
-    }
-
-    .favorite-btn.active {
-      color: #FFD700;
-    }
-
-    body.dark .favorite-btn, body[data-theme="dark"] .favorite-btn {
-      color: #888;
-    }
-
-    body.dark .favorite-btn.active, body[data-theme="dark"] .favorite-btn.active {
-      color: #FFD700;
-    }
-
-    /* 공유 버튼 스타일 */
+    /* 불필요한 스타일 제거 */
+    #barcodeForm,
+    #result,
+    #barcodeImage,
+    #barcodeText,
+    .button-group,
+    #downloadBtn,
     #shareBtn {
-      margin-left: 8px;
-      padding: 12px 20px;
-      background: linear-gradient(135deg, #0063B2, #0095FF);
-    }
-
-    /* 공유 모달 스타일 */
-    #shareModal {
       display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      z-index: 3000;
     }
 
-    .share-options {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-top: 16px;
-    }
-
-    .share-option {
-      padding: 16px;
-      border-radius: 12px;
-      background: #f5f5f5;
-      border: 1px solid #ddd;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      text-align: center;
-    }
-
-    .share-option:hover {
-      background: #e5e5e5;
-    }
-
-    body.dark .share-option, body[data-theme="dark"] .share-option {
-      background: #2d2d2d;
-      border-color: #404040;
-      color: #e0e0e0;
-    }
-
-    body.dark .share-option:hover, body[data-theme="dark"] .share-option:hover {
-      background: #404040;
-    }
-
-    .barcode-button:hover {
-      background: linear-gradient(135deg, #0063B2, #0095FF);
-      color: white;
-      border-color: transparent;
-    }
-
-    body.dark .barcode-button, body[data-theme="dark"] .barcode-button {
-      background: #2d2d2d;
-      color: #e0e0e0;
-      border-color: #404040;
-    }
-
-    body.dark .barcode-button:hover, body[data-theme="dark"] .barcode-button:hover {
-      background: linear-gradient(135deg, #0063B2, #0095FF);
-      color: white;
-      border-color: transparent;
+    /* 메인 컨텐츠 영역 여백 조정 */
+    body {
+      padding-top: 100px;  /* 상단 바코드 영역 고려 */
     }
 
     /* 가이드 모달 스타일 */
@@ -707,7 +581,7 @@
     }
 
     .guide-content {
-      background: white;
+      background: var(--modal-bg);
       padding: 24px;
       border-radius: 12px;
       width: 90%;
@@ -718,11 +592,12 @@
       transform: translate(-50%, -50%);
       text-align: left;
       font-size: 14px;
+      color: var(--text-color);
     }
 
     .guide-content h2 {
       margin-top: 0;
-      color: #0063B2;
+      color: var(--text-color);
       font-size: 1.3em;
       margin-bottom: 16px;
       text-align: center;
@@ -733,7 +608,7 @@
     }
 
     .guide-section h3 {
-      color: #0063B2;
+      color: var(--text-color);
       font-size: 1em;
       margin-bottom: 6px;
     }
@@ -749,81 +624,79 @@
       position: relative;
       line-height: 1.4;
       font-size: 0.95em;
+      color: var(--text-color);
     }
 
     .guide-section li::before {
       content: "•";
-      color: #0063B2;
+      color: var(--text-color);
       position: absolute;
       left: -15px;
       font-size: 1.1em;
     }
 
-    .modal-buttons {
-      text-align: center;
-      margin-top: 20px;
-    }
-
-    .modal-buttons button {
-      font-size: 14px;
+    /* 가이드 모달 버튼 스타일 */
+    .guide-content .modal-buttons button {
       padding: 8px 20px;
-    }
-
-    body.dark .guide-content, body[data-theme="dark"] .guide-content {
-      background: #2d2d2d;
-      color: #e0e0e0;
-    }
-
-    #helpBtn {
-      position: fixed;
-      right: 16px;
-      bottom: 70px;
-      z-index: 2000;
-      background: rgba(255,255,255,0.85);
+      background: var(--button-bg);
+      color: var(--button-text);
+      border: 1px solid var(--input-border);
       border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      padding: 8px 12px;
-      font-size: 14px;
-      color: #444;
-      border: none;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.3s ease;
     }
 
-    body.dark #helpBtn, body[data-theme="dark"] #helpBtn {
-      background: rgba(30,30,30,0.92);
-      color: #e0e0e0;
+    .guide-content .modal-buttons button:hover {
+      background: var(--theme-selector-bg);
     }
 
-    #fixedBarcode {
-      position: fixed;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: white;
-      padding: 10px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      z-index: 1000;
-      display: none;
-    }
-
-    #fixedBarcode canvas {
-      height: 40px;
-    }
-
-    body.dark #fixedBarcode, body[data-theme="dark"] #fixedBarcode {
-      background: #2d2d2d;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    /* 불필요한 다크모드 스타일 제거 */
+    body.dark .guide-content,
+    body[data-theme="dark"] .guide-content {
+      background: var(--modal-bg);
+      color: var(--text-color);
     }
   </style>
 </head>
 <body>
   <!-- 경고 메시지(페이지 최상단) -->
   <div id="kakaoWarning"></div>
+  
   <!-- 브라우저 전환 버튼(경고 아래, 본문 위) -->
   <div id="browserSwitch"></div>
-  <!-- 다크/라이트/시스템 선택상자 -->
+
+  <!-- 직번 입력 모달 -->
+  <div id="employeeIdModal">
+    <div class="employee-modal-content">
+      <h2>내 직번 설정</h2>
+      <p>직번을 입력하면 앱 실행 시<br>자동으로 바코드가 생성됩니다.</p>
+      <input type="text" id="employeeIdInput" placeholder="직번을 입력하세요" maxlength="7" inputmode="numeric" style="width: 80%; padding: 15px; margin-bottom: 20px; border-radius: 12px; border: 1px solid #ddd;" />
+      <button onclick="saveEmployeeId()" style="width: 80%; padding: 15px; background: #0063B2; color: white; border: none; border-radius: 12px; font-size: 16px; cursor: pointer;">저장하기</button>
+    </div>
+  </div>
+
+  <!-- 고정 바코드 영역 -->
+  <div id="fixedBarcode">
+    <canvas id="barcodeCanvas"></canvas>
+    <div id="employeeIdText"></div>
+  </div>
+
+  <!-- 직번 수정 버튼 -->
+  <button id="editEmployeeId" class="bottom-fixed-button">
+    <span>✏️</span> 직번 수정
+  </button>
+
+  <!-- 도움말 버튼 -->
+  <button id="helpBtn" class="bottom-fixed-button">
+    <span>❓</span> 도움말
+  </button>
+
+  <!-- 설정 버튼 -->
+  <button id="settingsBtn" class="bottom-fixed-button">
+    <span>⚙️</span> 설정
+  </button>
+
+  <!-- 테마 선택 상자 -->
   <div id="themeSelectorBox">
     <label for="themeSelector" style="font-weight:bold;">테마</label>
     <select id="themeSelector">
@@ -833,31 +706,6 @@
     </select>
   </div>
 
-  <!-- 설정 버튼 -->
-  <button id="settingsBtn">⚙️ 설정</button>
-
-  <!-- 설정 모달 -->
-  <div id="settingsModal">
-    <div class="modal-content">
-      <h2>설정</h2>
-      <div class="settings-group">
-        <label for="barcodeSize">바코드 크기</label>
-                  <select id="barcodeSize">
-           <option value="2" selected>작게</option>
-           <option value="3">보통</option>
-           <option value="4">크게</option>
-          </select>
-      </div>
-      <div class="modal-buttons">
-        <button id="closeSettingsBtn">닫기</button>
-        <button onclick="saveSettings()">저장</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 도움말 버튼 추가 -->
-  <button id="helpBtn">❓ 도움말</button>
-
   <!-- 가이드 모달 -->
   <div id="guideModal">
     <div class="guide-content">
@@ -866,10 +714,10 @@
       <div class="guide-section">
         <h3>📱 기본 사용법</h3>
         <ul>
-          <li>숫자만 입력 가능합니다 (최대 7자리)</li>
-          <li>바코드 생성 후 크기 조절이 가능합니다</li>
-          <li>생성된 바코드는 이미지로 저장하거나 공유할 수 있습니다</li>
-          <li>자주 사용하는 바코드는 즐겨찾기(★)에 등록하세요</li>
+          <li>처음 실행 시 직번을 입력하면 자동으로 바코드가 생성됩니다</li>
+          <li>저장된 직번은 앱을 다시 실행해도 유지됩니다</li>
+          <li>직번은 숫자만 입력 가능합니다 (최대 7자리)</li>
+          <li>우측 하단의 ✏️ 버튼으로 직번을 수정할 수 있습니다</li>
         </ul>
       </div>
 
@@ -878,8 +726,8 @@
         <ul>
           <li>홈 화면에 추가하여 앱처럼 사용할 수 있습니다</li>
           <li>다크모드를 지원합니다 (시스템 설정 연동 가능)</li>
-          <li>최근 생성한 바코드 5개가 자동으로 저장됩니다</li>
-          <li>즐겨찾기한 바코드는 영구적으로 저장됩니다</li>
+          <li>좌측 하단에서 테마를 변경할 수 있습니다</li>
+          <li>설정에서 바코드 크기를 조절할 수 있습니다</li>
         </ul>
       </div>
 
@@ -888,7 +736,7 @@
         <ul>
           <li>카카오톡 인앱 브라우저에서는 일부 기능이 제한됩니다</li>
           <li>원활한 사용을 위해 기본 브라우저 사용을 권장합니다</li>
-          <li>브라우저 데이터 삭제 시 저장된 바코드가 삭제될 수 있습니다</li>
+          <li>브라우저 데이터 삭제 시 저장된 직번이 삭제될 수 있습니다</li>
           <li>Code-128 형식으로만 바코드가 생성됩니다</li>
         </ul>
       </div>
@@ -899,50 +747,81 @@
     </div>
   </div>
 
-  <h1>💉 바코드 생성기 🩺</h1>
-  <p>텍스트를 입력하고 바코드를 생성하세요.</p>
-
-  <form onsubmit="generateBarcode(); return false;" id="barcodeForm" style="display:flex; justify-content:center; align-items:center; gap:8px; margin-bottom:0;">
-    <input type="text" id="barcodeInput" placeholder="직번을 입력하세요(ex. 0123456)" required maxlength="7" inputmode="numeric" style="width:220px; margin-bottom:0;" />
-    <button type="submit" style="margin-bottom:0;">바코드 생성</button>
-  </form>
-
-  <div id="result">
-    <div id="barcodeGuide">💫이 사이트를 홈 화면에 추가하면 웹앱형태로 이용 가능합니다!💫</div>
-    <img id="barcodeImage" src="" alt="바코드 이미지" style="display: none;" />
-    <div id="barcodeText"></div>
-    <div class="button-group" style="margin-top: 16px;">
-      <button id="downloadBtn" style="display: none;">이미지 다운로드</button>
-      <button id="shareBtn" style="display: none;">공유하기</button>
-    </div>
-  </div>
-
-  <div id="barcodeHistory">
-    <div id="favorites" class="history-section">
-      <div class="history-title">⭐ 즐겨찾기</div>
-    </div>
-    <div id="recents" class="history-section">
-      <div class="history-title">🕒 최근 바코드</div>
-    </div>
-  </div>
-
-  <!-- 공유 모달 -->
-  <div id="shareModal">
+  <!-- 설정 모달 -->
+  <div id="settingsModal">
     <div class="modal-content">
-      <h2>공유하기</h2>
-      <div class="share-options">
-        <div class="share-option" onclick="shareImage()">
-          <div>📱 이미지 공유</div>
+      <h2>⚙️ 설정</h2>
+      
+      <div class="settings-group">
+        <h3>바코드 설정</h3>
+        <div class="setting-item">
+          <label for="barcodeWidth">바코드 너비</label>
+          <select id="barcodeWidth">
+            <option value="1">얇게</option>
+            <option value="2" selected>보통</option>
+            <option value="3">굵게</option>
+          </select>
         </div>
-        <div class="share-option" onclick="copyImageUrl()">
-          <div>🔗 이미지 주소 복사</div>
+        <div class="setting-item">
+          <label for="barcodeHeight">바코드 높이</label>
+          <select id="barcodeHeight">
+            <option value="40">작게</option>
+            <option value="50" selected>보통</option>
+            <option value="60">크게</option>
+          </select>
         </div>
       </div>
+
+      <div class="settings-group">
+        <h3>화면 설정</h3>
+        <div class="setting-item">
+          <label for="screenBrightness">화면 밝기 고정</label>
+          <select id="screenBrightness">
+            <option value="off">사용 안함</option>
+            <option value="on">항상 밝게</option>
+          </select>
+        </div>
+        <div class="setting-item">
+          <label for="screenRotation">화면 회전</label>
+          <select id="screenRotation">
+            <option value="auto">자동 회전</option>
+            <option value="portrait">세로 고정</option>
+            <option value="landscape">가로 고정</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <h3>기타 설정</h3>
+        <div class="setting-item">
+          <label for="vibration">진동 피드백</label>
+          <select id="vibration">
+            <option value="on">사용</option>
+            <option value="off">사용 안함</option>
+          </select>
+        </div>
+        <div class="setting-item">
+          <label for="autoClose">자동 닫기 시간</label>
+          <select id="autoClose">
+            <option value="0">사용 안함</option>
+            <option value="30">30초</option>
+            <option value="60">1분</option>
+            <option value="300">5분</option>
+          </select>
+        </div>
+      </div>
+
       <div class="modal-buttons">
-        <button id="closeShareBtn">닫기</button>
+        <button onclick="resetSettings()" class="secondary-button">초기화</button>
+        <button onclick="saveSettings()" class="primary-button">저장</button>
+        <button onclick="closeSettingsModal()" class="cancel-button">취소</button>
       </div>
     </div>
   </div>
+
+  <h1>💉 바코드 생성기 🩺</h1>
+  <p>저장된 직번으로 바코드가 자동 생성됩니다.</p>
+  <p>※ 생성된 바코드는 사용자 책임 하에 사용되며, 본 앱은 이에 대한 책임을 지지 않습니다.</p>
 
   <div id="installSection" style="display: none;"></div>
 
@@ -951,10 +830,6 @@
       <span>✨ Created by yuangunn</span>
     </a>
   </footer>
-
-  <div id="fixedBarcode">
-    <canvas id="fixedBarcodeCanvas"></canvas>
-  </div>
 
   <script>
     // 브라우저/OS 감지 함수
@@ -1061,134 +936,89 @@
       }
     }
 
-    // 최근 바코드 저장/불러오기
-    function saveRecentBarcode(input) {
-      let recents = JSON.parse(localStorage.getItem('recent-barcodes') || '[]');
-      recents = recents.filter(x => x !== input); // 중복 제거
-      recents.unshift(input);
-      if (recents.length > 5) recents = recents.slice(0,5);
-      localStorage.setItem('recent-barcodes', JSON.stringify(recents));
-      renderBarcodeHistory();
-    }
-
-    function setBarcodeInput(val) {
-      document.getElementById('barcodeInput').value = val;
-      generateBarcode();
-    }
-
-    // 바코드 생성 및 유효성 검사 + 다운로드 버튼 + 입력값 표시
-    function generateBarcode() {
-      const input = document.getElementById("barcodeInput").value.trim();
-      // 숫자만 허용하도록 수정
+    // 직번 저장 및 바코드 생성 함수
+    function saveEmployeeId() {
+      const input = document.getElementById('employeeIdInput').value.trim();
+      
+      if (!input) {
+        alert('직번을 입력해주세요.');
+        return;
+      }
+      
       if (!/^\d+$/.test(input)) {
-        alert("숫자만 입력 가능합니다.");
+        alert('직번은 숫자만 입력 가능합니다.');
         return;
       }
 
-             const barcodeSize = localStorage.getItem('barcode-size') || '2';
-      const encoded = encodeURIComponent(input);
-      const url = `https://bwipjs-api.metafloor.com/?bcid=code128&text=${encoded}&scale=${barcodeSize}&backgroundcolor=ffffff&paddingwidth=20&paddingheight=40`;
-
-      const img = document.getElementById("barcodeImage");
-      img.src = url;
-      img.style.display = "block";
-      document.getElementById("barcodeGuide").style.display = "none";
-
-      // 다운로드와 공유 버튼 표시
-      const downloadBtn = document.getElementById("downloadBtn");
-      const shareBtn = document.getElementById("shareBtn");
-      downloadBtn.style.display = "inline-block";
-      shareBtn.style.display = "inline-block";
-
-      // 다운로드 버튼 이벤트 핸들러
-      downloadBtn.onclick = function() {
-        const a = document.createElement('a');
-        a.href = img.src;
-        a.download = `barcode_${input}.png`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      };
-
-      // 바코드 텍스트 표시
-      document.getElementById("barcodeText").textContent = input;
-
-      // 최근 바코드 저장
-      saveRecentBarcode(input);
+      localStorage.setItem('employee-id', input);
+      document.getElementById('employeeIdModal').style.display = 'none';
+      generateBarcode(input);
     }
 
-    // 설정 관련 함수들
-    function initSettings() {
-      const settingsBtn = document.getElementById('settingsBtn');
-      const settingsModal = document.getElementById('settingsModal');
-      const closeSettingsBtn = document.getElementById('closeSettingsBtn');
-      const barcodeSizeSelect = document.getElementById('barcodeSize');
-
-      // 저장된 바코드 크기 설정 불러오기
-             const savedSize = localStorage.getItem('barcode-size') || '2';
-      barcodeSizeSelect.value = savedSize;
-
-      settingsBtn.onclick = function() {
-        settingsModal.style.display = 'block';
-      };
-
-      closeSettingsBtn.onclick = function() {
-        settingsModal.style.display = 'none';
-      };
-
-      // 모달 외부 클릭시 닫기
-      settingsModal.onclick = function(e) {
-        if (e.target === settingsModal) {
-          settingsModal.style.display = 'none';
-        }
-      };
-    }
-
-    function saveSettings() {
-      const barcodeSizeSelect = document.getElementById('barcodeSize');
-      localStorage.setItem('barcode-size', barcodeSizeSelect.value);
+    // 바코드 생성 함수
+    function generateBarcode(text) {
+      const settings = loadSettings();
+      const barcodeCanvas = document.getElementById('barcodeCanvas');
       
-      // 현재 표시된 바코드가 있다면 새로운 크기로 다시 생성
-      const currentInput = document.getElementById('barcodeInput').value.trim();
-      if (currentInput && document.getElementById('barcodeImage').style.display !== 'none') {
-        generateBarcode();
+      JsBarcode(barcodeCanvas, text, {
+        format: "code128",
+        width: parseInt(settings.barcodeWidth),
+        height: parseInt(settings.barcodeHeight),
+        displayValue: false,
+        margin: 10
+      });
+
+      document.getElementById('employeeIdText').textContent = text;
+      document.getElementById('fixedBarcode').style.display = 'block';
+    }
+
+    // 페이지 로드 시 실행
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedEmployeeId = localStorage.getItem('employee-id');
+      
+      if (savedEmployeeId) {
+        generateBarcode(savedEmployeeId);
+        document.getElementById('employeeIdInput').value = savedEmployeeId;
+      } else {
+        document.getElementById('employeeIdModal').style.display = 'block';
       }
 
-      // 모달 닫기
-      document.getElementById('settingsModal').style.display = 'none';
-    }
+      // 직번 수정 버튼 이벤트
+      document.getElementById('editEmployeeId').addEventListener('click', () => {
+        document.getElementById('employeeIdModal').style.display = 'block';
+      });
 
-    window.addEventListener('DOMContentLoaded', () => {
+      // 입력 필드 숫자만 입력 가능하도록 설정
+      document.getElementById('employeeIdInput').addEventListener('input', function(e) {
+        this.value = this.value.replace(/[^0-9]/g, '');
+      });
+
+      // Enter 키로 저장
+      document.getElementById('employeeIdInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          saveEmployeeId();
+        }
+      });
+
+      // 브라우저/카카오톡 관련 코드는 유지
       showBrowserWarning();
       createBrowserSwitch();
       initSettings();
       initShareFeatures();
-      addStandaloneClass();  // standalone 클래스 추가
+      addStandaloneClass();
 
       if (isStandalone()) {
         document.getElementById('barcodeGuide').style.display = 'none';
       }
 
-      const installSection = document.getElementById('installSection');
-      if (isIosSafariOnly()) {
-        installSection.style.display = 'block';
-        installSection.innerHTML = `
-          <div class="ios-guide">
-            📱 <strong>iPhone 사용자 안내</strong><br>
-            1. Safari 하단의 <span style="font-size:1.2em;">🔼 공유 버튼</span> 클릭<br>
-            2. <strong>'홈 화면에 추가'</strong> 선택
-          </div>
-        `;
-      }
-
       // 테마 선택 초기화
-      initThemeSelector();
+      initTheme();
 
-      // 최근 바코드 표시
-      renderBarcodeHistory();
-
-      // 다운로드 버튼 숨김(초기)
-      document.getElementById("downloadBtn").style.display = "none";
+      // 첫 방문 시 가이드 모달 자동 표시
+      if (!localStorage.getItem('guide-shown')) {
+        setTimeout(showGuideModal, 1000);
+        localStorage.setItem('guide-shown', 'true');
+      }
     });
 
     let deferredPrompt;
@@ -1211,68 +1041,42 @@
       }
     });
 
-    // 다크/라이트/시스템 테마 선택 로직
-    function setTheme(mode) {
-      // body 클래스 초기화
-      document.body.classList.remove('light', 'dark');
-      document.body.removeAttribute('data-theme');
-
-      if (mode === 'auto') {
-        // 시스템 설정 확인
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-          document.body.classList.add('dark');
-          document.body.setAttribute('data-theme', 'dark');
-        } else {
-          document.body.classList.add('light');
-          document.body.setAttribute('data-theme', 'light');
-        }
-      } else if (mode === 'dark') {
-        document.body.classList.add('dark');
-        document.body.setAttribute('data-theme', 'dark');
-      } else if (mode === 'light') {
-        document.body.classList.add('light');
-        document.body.setAttribute('data-theme', 'light');
-      }
-
-      // 메타 태그 업데이트
-      updateMetaThemeColor();
+    // 테마 관련 함수들
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
     }
 
-    // 메타 테마 색상 업데이트
-    function updateMetaThemeColor() {
-      const isDark = document.body.classList.contains('dark');
-      const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-      if (metaThemeColor) {
-        metaThemeColor.content = isDark ? '#1a1a1a' : '#f9f9f9';
+    function initTheme() {
+      const savedTheme = localStorage.getItem('theme') || 'auto';
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      
+      document.getElementById('themeSelector').value = savedTheme;
+
+      if (savedTheme === 'auto') {
+        setTheme(prefersDark ? 'dark' : 'light');
+      } else {
+        setTheme(savedTheme);
       }
-    }
-
-    function initThemeSelector() {
-      const selector = document.getElementById('themeSelector');
-      
-      // 저장된 테마 불러오기
-      const savedTheme = localStorage.getItem('theme-mode') || 'auto';
-      selector.value = savedTheme;
-      
-      // 초기 테마 설정
-      setTheme(savedTheme);
-
-      // 테마 선택 변경 이벤트
-      selector.addEventListener('change', function() {
-        const mode = this.value;
-        setTheme(mode);
-        localStorage.setItem('theme-mode', mode);
-      });
 
       // 시스템 테마 변경 감지
-      const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      darkModeMediaQuery.addListener((e) => {
-        const currentTheme = localStorage.getItem('theme-mode') || 'auto';
-        if (currentTheme === 'auto') {
-          setTheme('auto');
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (localStorage.getItem('theme') === 'auto') {
+          setTheme(e.matches ? 'dark' : 'light');
         }
       });
     }
+
+    // 테마 선택 이벤트
+    document.getElementById('themeSelector').addEventListener('change', function() {
+      const selectedTheme = this.value;
+      if (selectedTheme === 'auto') {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        setTheme(prefersDark ? 'dark' : 'light');
+      } else {
+        setTheme(selectedTheme);
+      }
+    });
 
     // 즐겨찾기 관련 함수들
     function toggleFavorite(barcode) {
@@ -1408,6 +1212,165 @@
       document.getElementById('shareModal').style.display = 'none';
     }
 
+    // 설정 관련 함수들
+    function initSettings() {
+      // 저장된 설정 불러오기
+      const settings = loadSettings();
+      
+      // 각 설정값 적용
+      document.getElementById('barcodeWidth').value = settings.barcodeWidth;
+      document.getElementById('barcodeHeight').value = settings.barcodeHeight;
+      document.getElementById('screenBrightness').value = settings.screenBrightness;
+      document.getElementById('screenRotation').value = settings.screenRotation;
+      document.getElementById('vibration').value = settings.vibration;
+      document.getElementById('autoClose').value = settings.autoClose;
+
+      // 설정 버튼 이벤트
+      document.getElementById('settingsBtn').addEventListener('click', openSettingsModal);
+
+      // 설정 변경 시 미리보기 업데이트
+      document.getElementById('barcodeWidth').addEventListener('change', updateBarcodePreview);
+      document.getElementById('barcodeHeight').addEventListener('change', updateBarcodePreview);
+
+      // 화면 설정 적용
+      applyScreenSettings(settings);
+    }
+
+    function loadSettings() {
+      const defaultSettings = {
+        barcodeWidth: '2',
+        barcodeHeight: '50',
+        screenBrightness: 'off',
+        screenRotation: 'auto',
+        vibration: 'on',
+        autoClose: '0'
+      };
+
+      const savedSettings = localStorage.getItem('app-settings');
+      return savedSettings ? JSON.parse(savedSettings) : defaultSettings;
+    }
+
+    // 화면 밝기 관련 전역 변수
+    let wakeLock = null;
+
+    // 화면 밝기 고정 함수
+    async function setWakeLock(enable) {
+      if (!('wakeLock' in navigator)) {
+        console.log('Wake Lock API가 지원되지 않습니다.');
+        return;
+      }
+
+      try {
+        if (enable) {
+          wakeLock = await navigator.wakeLock.request('screen');
+          console.log('화면 밝기가 고정되었습니다.');
+          
+          // visibility 변경 시 다시 요청
+          document.addEventListener('visibilitychange', handleVisibilityChange);
+        } else {
+          if (wakeLock) {
+            await wakeLock.release();
+            wakeLock = null;
+            console.log('화면 밝기 고정이 해제되었습니다.');
+          }
+          document.removeEventListener('visibilitychange', handleVisibilityChange);
+        }
+      } catch (err) {
+        console.error('화면 밝기 고정 설정 실패:', err);
+      }
+    }
+
+    // visibility 변경 처리
+    async function handleVisibilityChange() {
+      if (document.visibilityState === 'visible' && 
+          localStorage.getItem('app-settings') && 
+          JSON.parse(localStorage.getItem('app-settings')).screenBrightness === 'on') {
+        try {
+          wakeLock = await navigator.wakeLock.request('screen');
+          console.log('화면 밝기가 다시 고정되었습니다.');
+        } catch (err) {
+          console.error('화면 밝기 재고정 실패:', err);
+        }
+      }
+    }
+
+    function applyScreenSettings(settings) {
+      // 화면 회전 설정
+      if (screen.orientation && screen.orientation.lock) {
+        try {
+          if (settings.screenRotation === 'portrait') {
+            screen.orientation.lock('portrait');
+          } else if (settings.screenRotation === 'landscape') {
+            screen.orientation.lock('landscape');
+          } else {
+            screen.orientation.unlock();
+          }
+        } catch (e) {
+          console.log('화면 회전 설정 실패:', e);
+        }
+      }
+
+      // 화면 밝기 설정
+      setWakeLock(settings.screenBrightness === 'on');
+    }
+
+    function updateBarcodePreview() {
+      const currentBarcode = document.getElementById('employeeIdText').textContent;
+      if (currentBarcode) {
+        generateBarcode(currentBarcode);
+      }
+    }
+
+    function openSettingsModal() {
+      document.getElementById('settingsModal').style.display = 'block';
+    }
+
+    function closeSettingsModal() {
+      document.getElementById('settingsModal').style.display = 'none';
+    }
+
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+
+      setTimeout(() => {
+        toast.classList.add('show');
+        setTimeout(() => {
+          toast.classList.remove('show');
+          setTimeout(() => {
+            document.body.removeChild(toast);
+          }, 300);
+        }, 2000);
+      }, 100);
+    }
+
+    // 토스트 메시지 스타일
+    const toastStyle = document.createElement('style');
+    toastStyle.textContent = `
+      .toast {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%) translateY(100px);
+        background: var(--theme-selector-bg);
+        color: var(--text-color);
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 14px;
+        z-index: 5000;
+        opacity: 0;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px var(--box-shadow);
+      }
+      .toast.show {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
+    `;
+    document.head.appendChild(toastStyle);
+
     // 가이드 모달 관련 함수
     function showGuideModal() {
       document.getElementById('guideModal').style.display = 'block';
@@ -1424,65 +1387,6 @@
     document.getElementById('guideModal').addEventListener('click', function(e) {
       if (e.target === this) {
         closeGuideModal();
-      }
-    });
-
-    // 첫 방문 시 가이드 모달 자동 표시
-    if (!localStorage.getItem('guide-shown')) {
-      window.addEventListener('DOMContentLoaded', function() {
-        setTimeout(showGuideModal, 1000);
-        localStorage.setItem('guide-shown', 'true');
-      });
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-      const savedEmployeeId = localStorage.getItem('employeeId');
-      if (savedEmployeeId) {
-        generateBarcode(savedEmployeeId);
-        document.getElementById('barcodeInput').value = savedEmployeeId;
-        showFixedBarcode(savedEmployeeId);
-      }
-    });
-
-    function generateBarcode(text) {
-      if (!text) return;
-      
-      localStorage.setItem('employeeId', text);
-      
-      JsBarcode("#barcode", text, {
-        format: "code128",
-        width: 2,
-        height: 100,
-        displayValue: true,
-        fontSize: 20,
-        margin: 10
-      });
-
-      showFixedBarcode(text);
-    }
-
-    function showFixedBarcode(text) {
-      const fixedBarcodeElement = document.getElementById('fixedBarcodeCanvas');
-      JsBarcode(fixedBarcodeElement, text, {
-        format: "code128",
-        width: 1,
-        height: 30,
-        displayValue: false,
-        margin: 5
-      });
-      document.getElementById('fixedBarcode').style.display = 'block';
-    }
-
-    document.getElementById('generateBtn').addEventListener('click', function() {
-      const text = document.getElementById('barcodeInput').value;
-      generateBarcode(text);
-    });
-
-    // 입력 필드에서 엔터 키 처리
-    document.getElementById('barcodeInput').addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        const text = this.value;
-        generateBarcode(text);
       }
     });
   </script>
