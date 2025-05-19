@@ -42,7 +42,7 @@
       --text-color: #e0e0e0;
       --modal-bg: #2d2d2d;
       --modal-text: #e0e0e0;
-      --input-bg: #1a1a1a;
+      --input-bg: #2d2d2d;
       --input-border: #404040;
       --input-text: #e0e0e0;
       --button-bg: rgba(45,45,45,0.9);
@@ -1114,6 +1114,9 @@
       if (barcodeCanvas) {
         const theme = document.documentElement.getAttribute('data-theme');
         barcodeCanvas.style.backgroundColor = theme === 'dark' ? '#2d2d2d' : '#ffffff';
+        barcodeCanvas.style.borderRadius = '12px';
+        barcodeCanvas.style.padding = '20px';
+        barcodeCanvas.style.boxShadow = '0 4px 16px var(--box-shadow)';
       }
     }
 
