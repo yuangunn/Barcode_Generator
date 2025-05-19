@@ -1250,53 +1250,48 @@
       return savedSettings ? JSON.parse(savedSettings) : defaultSettings;
     }
 
-    function saveSettings() {
-      const settings = {
-        barcodeWidth: document.getElementById('barcodeWidth').value,
-        barcodeHeight: document.getElementById('barcodeHeight').value,
-        screenBrightness: document.getElementById('screenBrightness').value,
-        screenRotation: document.getElementById('screenRotation').value,
-        vibration: document.getElementById('vibration').value,
-        autoClose: document.getElementById('autoClose').value
-      };
+    // 화면 밝기 관련 전역 변수
+    let wakeLock = null;
 
-      localStorage.setItem('app-settings', JSON.stringify(settings));
-      
-      // 설정 적용
-      applySettings(settings);
-      
-      // 진동 피드백
-      if (settings.vibration === 'on') {
-        navigator.vibrate && navigator.vibrate(50);
+    // 화면 밝기 고정 함수
+    async function setWakeLock(enable) {
+      if (!('wakeLock' in navigator)) {
+        console.log('Wake Lock API가 지원되지 않습니다.');
+        return;
       }
 
-      // 모달 닫기
-      closeSettingsModal();
-      
-      // 성공 메시지
-      showToast('설정이 저장되었습니다');
-    }
-
-    function resetSettings() {
-      if (confirm('모든 설정을 초기화하시겠습니까?')) {
-        localStorage.removeItem('app-settings');
-        initSettings();
-        closeSettingsModal();
-        showToast('설정이 초기화되었습니다');
+      try {
+        if (enable) {
+          wakeLock = await navigator.wakeLock.request('screen');
+          console.log('화면 밝기가 고정되었습니다.');
+          
+          // visibility 변경 시 다시 요청
+          document.addEventListener('visibilitychange', handleVisibilityChange);
+        } else {
+          if (wakeLock) {
+            await wakeLock.release();
+            wakeLock = null;
+            console.log('화면 밝기 고정이 해제되었습니다.');
+          }
+          document.removeEventListener('visibilitychange', handleVisibilityChange);
+        }
+      } catch (err) {
+        console.error('화면 밝기 고정 설정 실패:', err);
       }
     }
 
-    function applySettings(settings) {
-      // 바코드 설정 적용
-      if (document.getElementById('employeeIdText').textContent) {
-        generateBarcode(document.getElementById('employeeIdText').textContent);
+    // visibility 변경 처리
+    async function handleVisibilityChange() {
+      if (document.visibilityState === 'visible' && 
+          localStorage.getItem('app-settings') && 
+          JSON.parse(localStorage.getItem('app-settings')).screenBrightness === 'on') {
+        try {
+          wakeLock = await navigator.wakeLock.request('screen');
+          console.log('화면 밝기가 다시 고정되었습니다.');
+        } catch (err) {
+          console.error('화면 밝기 재고정 실패:', err);
+        }
       }
-
-      // 화면 설정 적용
-      applyScreenSettings(settings);
-
-      // 자동 닫기 타이머 설정
-      setAutoCloseTimer(settings.autoClose);
     }
 
     function applyScreenSettings(settings) {
@@ -1316,15 +1311,7 @@
       }
 
       // 화면 밝기 설정
-      if (settings.screenBrightness === 'on') {
-        if ('wakeLock' in navigator) {
-          try {
-            navigator.wakeLock.request('screen');
-          } catch (e) {
-            console.log('화면 켜짐 유지 설정 실패:', e);
-          }
-        }
-      }
+      setWakeLock(settings.screenBrightness === 'on');
     }
 
     function updateBarcodePreview() {
