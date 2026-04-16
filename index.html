@@ -721,128 +721,6 @@
     }
 
     /* ═══════════════════════════════════════════
-       SCANNER TAB
-       ═══════════════════════════════════════════ */
-    .scanner-container {
-      max-width: 420px;
-      margin: 0 auto;
-    }
-
-    .scanner-title {
-      font-size: 18px;
-      font-weight: 700;
-      text-align: center;
-      margin-bottom: 16px;
-    }
-
-    .scanner-viewport {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 4/3;
-      background: #000;
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-      border: 2px solid var(--border);
-    }
-
-    .scanner-viewport video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .scanner-overlay {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .scanner-crosshair {
-      width: 70%;
-      height: 50%;
-      border: 2px solid rgba(255,255,255,0.6);
-      border-radius: 12px;
-      position: relative;
-    }
-
-    .scanner-crosshair::after {
-      content: '';
-      position: absolute;
-      left: 10%;
-      right: 10%;
-      top: 50%;
-      height: 2px;
-      background: var(--sev-1);
-      animation: scanLine 2s ease-in-out infinite;
-      box-shadow: 0 0 8px var(--sev-1);
-    }
-
-    @keyframes scanLine {
-      0%, 100% { top: 30%; }
-      50% { top: 70%; }
-    }
-
-    .scanner-result {
-      margin-top: 16px;
-      padding: 16px;
-      background: var(--bg-card);
-      border-radius: var(--radius-md);
-      border: 1px solid var(--border);
-      text-align: center;
-    }
-
-    .scanner-result-value {
-      font-family: var(--font-mono);
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--sev-1);
-      margin-bottom: 8px;
-      word-break: break-all;
-    }
-
-    .scanner-result-format {
-      font-size: 12px;
-      color: var(--text-tertiary);
-      font-family: var(--font-mono);
-      margin-bottom: 12px;
-    }
-
-    .scanner-unsupported {
-      text-align: center;
-      padding: 60px 20px;
-    }
-
-    .scanner-unsupported-icon {
-      font-size: 48px;
-      margin-bottom: 12px;
-      opacity: 0.3;
-    }
-
-    .scanner-unsupported-text {
-      font-size: 14px;
-      color: var(--text-secondary);
-      margin-bottom: 4px;
-    }
-
-    .scanner-unsupported-hint {
-      font-size: 12px;
-      color: var(--text-tertiary);
-    }
-
-    .scanner-btn-row {
-      display: flex;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .scanner-btn-row .btn-primary,
-    .scanner-btn-row .btn-secondary {
-      margin-top: 0;
-    }
-
-    /* ═══════════════════════════════════════════
        SETTINGS TAB
        ═══════════════════════════════════════════ */
     .settings-container {
@@ -1175,14 +1053,6 @@
       </div>
     </div>
 
-    <!-- SCANNER TAB -->
-    <div id="tabScan" class="tab-panel">
-      <div class="scanner-container">
-        <div class="scanner-title">바코드 스캔</div>
-        <div id="scannerContent"></div>
-      </div>
-    </div>
-
     <!-- SETTINGS TAB -->
     <div id="tabSettings" class="tab-panel">
       <div class="settings-container">
@@ -1287,10 +1157,6 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="7" y1="7" x2="7" y2="17"/><line x1="10" y1="7" x2="10" y2="17"/><line x1="14" y1="7" x2="14" y2="17"/><line x1="17" y1="7" x2="17" y2="17"/></svg>
       <span>바코드</span>
     </button>
-    <button class="nav-item" data-tab="tabScan" onclick="switchTab('tabScan')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-      <span>스캔</span>
-    </button>
     <button class="nav-item" data-tab="tabSettings" onclick="switchTab('tabSettings')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
       <span>설정</span>
@@ -1345,7 +1211,6 @@
             <li>홈 화면에 추가하면 앱처럼 사용 가능합니다</li>
             <li>오프라인에서도 바코드 생성이 가능합니다</li>
             <li>다크모드 지원 (시스템 설정 연동)</li>
-            <li>바코드 스캔 기능 (지원 브라우저에서)</li>
           </ul>
         </div>
         <div>
@@ -1385,8 +1250,6 @@
     };
 
     let wakeLockSentinel = null;
-    let scannerStream = null;
-    let scannerInterval = null;
     let deferredInstallPrompt = null;
 
     /* ═══════════════════════════════════════════
@@ -2029,128 +1892,7 @@
       document.getElementById(tabId).classList.add('active');
       document.querySelector(`.nav-item[data-tab="${tabId}"]`).classList.add('active');
 
-      // Handle scanner
-      if (tabId === 'tabScan') {
-        initScanner();
-      } else {
-        stopScanner();
-      }
-
       haptic();
-    }
-
-    /* ═══════════════════════════════════════════
-       SCANNER
-       ═══════════════════════════════════════════ */
-    function initScanner() {
-      const content = document.getElementById('scannerContent');
-
-      if (!('BarcodeDetector' in window)) {
-        content.innerHTML = `
-          <div class="scanner-unsupported">
-            <div class="scanner-unsupported-icon">📷</div>
-            <div class="scanner-unsupported-text">이 브라우저에서는 바코드 스캔을 지원하지 않습니다</div>
-            <div class="scanner-unsupported-hint">Chrome(Android) 또는 최신 브라우저를 사용해 주세요</div>
-          </div>
-        `;
-        return;
-      }
-
-      content.innerHTML = `
-        <div class="scanner-viewport">
-          <video id="scannerVideo" autoplay playsinline></video>
-          <div class="scanner-overlay">
-            <div class="scanner-crosshair"></div>
-          </div>
-        </div>
-        <div id="scannerResult" class="scanner-result" style="display:none;"></div>
-      `;
-
-      startCamera();
-    }
-
-    async function startCamera() {
-      try {
-        const video = document.getElementById('scannerVideo');
-        if (!video) return;
-
-        scannerStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment' },
-        });
-        video.srcObject = scannerStream;
-
-        const detector = new BarcodeDetector({
-          formats: ['code_128', 'ean_13', 'ean_8', 'qr_code', 'code_39'],
-        });
-
-        scannerInterval = setInterval(async () => {
-          if (video.readyState < 2) return;
-          try {
-            const barcodes = await detector.detect(video);
-            if (barcodes.length > 0) {
-              const result = barcodes[0];
-              showScanResult(result.rawValue, result.format);
-            }
-          } catch (e) {
-            // Ignore detection errors
-          }
-        }, 300);
-      } catch (err) {
-        const content = document.getElementById('scannerContent');
-        content.innerHTML = `
-          <div class="scanner-unsupported">
-            <div class="scanner-unsupported-icon">🔒</div>
-            <div class="scanner-unsupported-text">카메라 접근이 거부되었습니다</div>
-            <div class="scanner-unsupported-hint">브라우저 설정에서 카메라 권한을 허용해 주세요</div>
-          </div>
-        `;
-      }
-    }
-
-    function showScanResult(value, format) {
-      clearInterval(scannerInterval);
-      scannerInterval = null;
-
-      const resultDiv = document.getElementById('scannerResult');
-      if (!resultDiv) return;
-
-      resultDiv.style.display = 'block';
-      resultDiv.innerHTML = `
-        <div class="scanner-result-value">${escapeHtml(value)}</div>
-        <div class="scanner-result-format">${format}</div>
-        <div class="scanner-btn-row">
-          <button class="btn-secondary" onclick="copyScanResult('${escapeHtml(value)}')">복사</button>
-          <button class="btn-primary" onclick="saveAsProfile('${escapeHtml(value)}')">프로필로 저장</button>
-        </div>
-      `;
-
-      haptic();
-    }
-
-    function copyScanResult(value) {
-      if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(value).then(() => showToast('복사되었습니다'));
-      }
-    }
-
-    function saveAsProfile(value) {
-      stopScanner();
-      switchTab('tabHome');
-      openProfileModal();
-      setTimeout(() => {
-        document.getElementById('profileValueInput').value = value;
-      }, 100);
-    }
-
-    function stopScanner() {
-      if (scannerInterval) {
-        clearInterval(scannerInterval);
-        scannerInterval = null;
-      }
-      if (scannerStream) {
-        scannerStream.getTracks().forEach((t) => t.stop());
-        scannerStream = null;
-      }
     }
 
     /* ═══════════════════════════════════════════
@@ -2290,7 +2032,6 @@
       modal.addEventListener('click', (e) => {
         if (e.target === modal) {
           modal.classList.remove('active');
-          stopScanner();
         }
       });
     });
