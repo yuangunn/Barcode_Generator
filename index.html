@@ -1101,6 +1101,14 @@
               <option value="100">크게</option>
             </select>
           </div>
+          <div class="setting-row">
+            <span class="setting-label">다운로드 해상도</span>
+            <select class="setting-select" id="settingExportScale" onchange="saveAppSettings();">
+              <option value="2">보통 (2x)</option>
+              <option value="4" selected>고화질 (4x)</option>
+              <option value="6">최고화질 (6x)</option>
+            </select>
+          </div>
         </div>
 
         <!-- Display settings -->
@@ -1243,6 +1251,7 @@
         defaultFormat: 'CODE128',
         barcodeWidth: '2',
         barcodeHeight: '70',
+        exportScale: '4',
         theme: 'auto',
         wakeLock: 'off',
         vibration: 'on',
@@ -1806,37 +1815,78 @@
     /* ═══════════════════════════════════════════
        ACTIONS: DOWNLOAD, SHARE, COPY
        ═══════════════════════════════════════════ */
+    function renderHighResBarcode(profile) {
+      const scale = parseInt(state.settings.exportScale || '4');
+      const offscreen = document.createElement('canvas');
+
+      if (profile.format === 'QR') {
+        const qr = qrcode(0, 'M');
+        qr.addData(profile.value);
+        qr.make();
+        const moduleCount = qr.getModuleCount();
+        const cellSize = 10 * scale;
+        const size = moduleCount * cellSize;
+        const padding = 4 * cellSize;
+        offscreen.width = size + padding * 2;
+        offscreen.height = size + padding * 2;
+        const ctx = offscreen.getContext('2d');
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, offscreen.width, offscreen.height);
+        for (let r = 0; r < moduleCount; r++) {
+          for (let c = 0; c < moduleCount; c++) {
+            if (qr.isDark(r, c)) {
+              ctx.fillStyle = '#023671';
+              ctx.fillRect(padding + c * cellSize, padding + r * cellSize, cellSize, cellSize);
+            }
+          }
+        }
+      } else {
+        let jsFormat = profile.format;
+        if (jsFormat === 'EAN13') jsFormat = 'EAN13';
+        else if (jsFormat === 'CODE39') jsFormat = 'CODE39';
+        else jsFormat = 'CODE128';
+
+        JsBarcode(offscreen, profile.value, {
+          format: jsFormat,
+          width: parseInt(state.settings.barcodeWidth) * scale,
+          height: parseInt(state.settings.barcodeHeight) * scale,
+          displayValue: true,
+          fontSize: 14 * scale,
+          font: 'monospace',
+          textMargin: 4 * scale,
+          margin: 10 * scale,
+          background: '#FFFFFF',
+          lineColor: '#023671',
+        });
+      }
+
+      return offscreen;
+    }
+
     function downloadBarcode() {
       const profile = getActiveProfile();
       if (!profile) return;
 
-      let canvas;
-      if (profile.format === 'QR') {
-        canvas = document.getElementById('qrCanvas');
-      } else {
-        canvas = document.getElementById('barcodeCanvas');
+      try {
+        const canvas = renderHighResBarcode(profile);
+        const link = document.createElement('a');
+        link.download = `barcode_${profile.value}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        haptic();
+        showToast('고해상도 이미지가 저장되었습니다');
+      } catch (err) {
+        console.error('High-res render failed:', err);
+        showToast('다운로드에 실패했습니다');
       }
-
-      const link = document.createElement('a');
-      link.download = `barcode_${profile.value}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-      haptic();
-      showToast('이미지가 저장되었습니다');
     }
 
     async function shareBarcode() {
       const profile = getActiveProfile();
       if (!profile) return;
 
-      let canvas;
-      if (profile.format === 'QR') {
-        canvas = document.getElementById('qrCanvas');
-      } else {
-        canvas = document.getElementById('barcodeCanvas');
-      }
-
       try {
+        const canvas = renderHighResBarcode(profile);
         const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
         const file = new File([blob], `barcode_${profile.value}.png`, { type: 'image/png' });
 
@@ -1847,7 +1897,6 @@
             text: `바코드: ${profile.value}`,
           });
         } else {
-          // Fallback to download
           downloadBarcode();
         }
       } catch (err) {
@@ -1902,6 +1951,7 @@
       document.getElementById('settingDefaultFormat').value = state.settings.defaultFormat || 'CODE128';
       document.getElementById('settingBarcodeWidth').value = state.settings.barcodeWidth || '2';
       document.getElementById('settingBarcodeHeight').value = state.settings.barcodeHeight || '70';
+      document.getElementById('settingExportScale').value = state.settings.exportScale || '4';
       document.getElementById('settingTheme').value = state.settings.theme || 'auto';
       document.getElementById('settingWakeLock').value = state.settings.wakeLock || 'off';
       document.getElementById('settingVibration').value = state.settings.vibration || 'on';
@@ -1911,6 +1961,7 @@
       state.settings.defaultFormat = document.getElementById('settingDefaultFormat').value;
       state.settings.barcodeWidth = document.getElementById('settingBarcodeWidth').value;
       state.settings.barcodeHeight = document.getElementById('settingBarcodeHeight').value;
+      state.settings.exportScale = document.getElementById('settingExportScale').value;
       state.settings.theme = document.getElementById('settingTheme').value;
       state.settings.wakeLock = document.getElementById('settingWakeLock').value;
       state.settings.vibration = document.getElementById('settingVibration').value;
