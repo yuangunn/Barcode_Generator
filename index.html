@@ -489,8 +489,16 @@
       letter-spacing: 1px;
       color: var(--sev-1);
       background: var(--sev-tint);
+      border: 1.5px solid transparent;
       border-radius: 4px;
       text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .barcode-format-badge:hover {
+      border-color: var(--sev-1);
+      background: var(--sev-tint-mid);
     }
 
     /* Empty state */
@@ -1008,7 +1016,7 @@
             <canvas id="qrCanvas"></canvas>
           </div>
           <div class="barcode-value" id="heroValue"></div>
-          <div class="barcode-format-badge" id="heroFormat"></div>
+          <div class="barcode-format-badge" id="heroFormat" onclick="openFormatSwitcher()"></div>
         </div>
       </div>
 
@@ -1197,6 +1205,17 @@
       <button class="btn-primary" onclick="saveProfile()">저장</button>
       <button class="btn-secondary" onclick="closeProfileModal()">취소</button>
       <button class="btn-danger" id="profileDeleteBtn" style="display:none;" onclick="deleteProfile()">프로필 삭제</button>
+    </div>
+  </div>
+
+  <!-- ═══════════ FORMAT SWITCHER MODAL ═══════════ -->
+  <div id="formatSwitcherModal" class="modal-overlay">
+    <div class="modal-panel" style="max-width:320px;">
+      <div class="modal-title">바코드 포맷 변경</div>
+      <div class="modal-subtitle">현재 프로필의 포맷을 변경합니다</div>
+      <div class="format-selector" id="formatSwitcherChips" style="justify-content:center;"></div>
+      <button class="btn-primary" onclick="applyFormatSwitch()">변경</button>
+      <button class="btn-secondary" onclick="closeFormatSwitcher()">취소</button>
     </div>
   </div>
 
@@ -1396,9 +1415,10 @@
       const canvas = document.getElementById(canvasId);
       const qrWrap = document.getElementById('qrWrap');
       const barcodeWrap = document.getElementById('barcodeWrap');
+      const dpr = window.devicePixelRatio || 1;
+      const scale = Math.max(dpr, 2);
 
       if (format === 'QR') {
-        // Show QR, hide barcode
         barcodeWrap.style.display = 'none';
         qrWrap.style.display = 'flex';
 
@@ -1407,14 +1427,17 @@
         qr.addData(value);
         qr.make();
 
-        const size = 200;
-        const cellSize = size / qr.getModuleCount();
-        qrCanvas.width = size;
-        qrCanvas.height = size;
+        const displaySize = 200;
+        const renderSize = displaySize * scale;
+        const cellSize = renderSize / qr.getModuleCount();
+        qrCanvas.width = renderSize;
+        qrCanvas.height = renderSize;
+        qrCanvas.style.width = displaySize + 'px';
+        qrCanvas.style.height = displaySize + 'px';
         const ctx = qrCanvas.getContext('2d');
-        ctx.clearRect(0, 0, size, size);
+        ctx.clearRect(0, 0, renderSize, renderSize);
         ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, size, size);
+        ctx.fillRect(0, 0, renderSize, renderSize);
 
         for (let r = 0; r < qr.getModuleCount(); r++) {
           for (let c = 0; c < qr.getModuleCount(); c++) {
@@ -1427,7 +1450,7 @@
         return true;
       }
 
-      // Standard barcode
+      // Standard barcode - render at high DPI
       barcodeWrap.style.display = 'flex';
       qrWrap.style.display = 'none';
 
@@ -1437,15 +1460,19 @@
       else jsFormat = 'CODE128';
 
       try {
+        const baseWidth = parseInt(state.settings.barcodeWidth);
+        const baseHeight = parseInt(state.settings.barcodeHeight);
         JsBarcode(canvas, value, {
           format: jsFormat,
-          width: parseInt(state.settings.barcodeWidth),
-          height: parseInt(state.settings.barcodeHeight),
+          width: baseWidth * scale,
+          height: baseHeight * scale,
           displayValue: false,
-          margin: 10,
+          margin: 10 * scale,
           background: '#FFFFFF',
           lineColor: '#023671',
         });
+        canvas.style.width = (canvas.width / scale) + 'px';
+        canvas.style.height = (canvas.height / scale) + 'px';
         return true;
       } catch (err) {
         console.error('Barcode generation failed:', err);
@@ -1522,7 +1549,7 @@
         pill.innerHTML = `
           <div>
             <div class="profile-pill-name">${escapeHtml(p.name)}</div>
-            <div class="profile-pill-value">${escapeHtml(p.value)}</div>
+            <div class="profile-pill-value">${escapeHtml(p.value)} · ${p.format}</div>
           </div>
         `;
         pill.onclick = () => {
@@ -1552,6 +1579,11 @@
       container.appendChild(addBtn);
     }
 
+    function getFormatForValue(value) {
+      const profile = state.profiles.find((p) => p.value === value);
+      return profile ? profile.format : '';
+    }
+
     function renderHistory() {
       // Favorites
       const favSection = document.getElementById('favoritesSection');
@@ -1560,10 +1592,12 @@
         favSection.style.display = 'block';
         favChips.innerHTML = '';
         state.favorites.forEach((val) => {
+          const fmt = getFormatForValue(val);
+          const fmtLabel = fmt ? ` <span style="font-size:10px;opacity:0.5;">${fmt}</span>` : '';
           const chip = document.createElement('div');
           chip.className = 'history-chip';
           chip.innerHTML = `
-            <span onclick="quickGenerate('${escapeHtml(val)}')" style="cursor:pointer">${escapeHtml(val)}</span>
+            <span onclick="quickGenerate('${escapeHtml(val)}')" style="cursor:pointer">${escapeHtml(val)}${fmtLabel}</span>
             <button class="fav-toggle" onclick="toggleFavorite('${escapeHtml(val)}')">&#9733;</button>
           `;
           favChips.appendChild(chip);
@@ -1580,10 +1614,12 @@
         recSection.style.display = 'block';
         recChips.innerHTML = '';
         filteredRecents.forEach((val) => {
+          const fmt = getFormatForValue(val);
+          const fmtLabel = fmt ? ` <span style="font-size:10px;opacity:0.5;">${fmt}</span>` : '';
           const chip = document.createElement('div');
           chip.className = 'history-chip';
           chip.innerHTML = `
-            <span onclick="quickGenerate('${escapeHtml(val)}')" style="cursor:pointer">${escapeHtml(val)}</span>
+            <span onclick="quickGenerate('${escapeHtml(val)}')" style="cursor:pointer">${escapeHtml(val)}${fmtLabel}</span>
             <button class="fav-toggle" onclick="toggleFavorite('${escapeHtml(val)}')">&#9734;</button>
           `;
           recChips.appendChild(chip);
@@ -2076,6 +2112,57 @@
 
     function closeGuide() {
       document.getElementById('guideModal').classList.remove('active');
+    }
+
+    /* ═══════════════════════════════════════════
+       FORMAT SWITCHER
+       ═══════════════════════════════════════════ */
+    function openFormatSwitcher() {
+      const profile = getActiveProfile();
+      if (!profile) return;
+
+      const container = document.getElementById('formatSwitcherChips');
+      const formats = ['CODE128', 'EAN13', 'CODE39', 'QR'];
+      container.innerHTML = '';
+      formats.forEach((f) => {
+        const chip = document.createElement('div');
+        chip.className = 'format-chip' + (f === profile.format ? ' active' : '');
+        chip.dataset.format = f;
+        chip.textContent = f === 'CODE128' ? 'Code-128' : f === 'EAN13' ? 'EAN-13' : f === 'CODE39' ? 'Code-39' : 'QR';
+        chip.onclick = () => {
+          container.querySelectorAll('.format-chip').forEach((c) => c.classList.remove('active'));
+          chip.classList.add('active');
+        };
+        container.appendChild(chip);
+      });
+
+      document.getElementById('formatSwitcherModal').classList.add('active');
+    }
+
+    function applyFormatSwitch() {
+      const profile = getActiveProfile();
+      if (!profile) return;
+
+      const active = document.querySelector('#formatSwitcherChips .format-chip.active');
+      if (!active) return;
+
+      const newFormat = active.dataset.format;
+
+      if (newFormat === 'EAN13' && (!/^\d+$/.test(profile.value) || (profile.value.length !== 12 && profile.value.length !== 13))) {
+        showToast('EAN-13은 12~13자리 숫자가 필요합니다');
+        return;
+      }
+
+      profile.format = newFormat;
+      saveState();
+      closeFormatSwitcher();
+      haptic();
+      renderAll();
+      showToast('포맷이 변경되었습니다');
+    }
+
+    function closeFormatSwitcher() {
+      document.getElementById('formatSwitcherModal').classList.remove('active');
     }
 
     // Close modals on backdrop click
